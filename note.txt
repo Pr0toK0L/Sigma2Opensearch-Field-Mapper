@@ -1,0 +1,15 @@
+Alternatives winlogbeat:
+
+ParentCommandLine: process.parent.command_line.text
+
+CommandLine: process.command_line.text
+
+OriginalFileName: không chắc
+
+Product: không chắc
+
+Image: không chắc
+
+Description: không chắc
+
+Alternatives auditbeat:
