@@ -125,16 +125,22 @@ class SigmaConverter:
         self._create_label_entry_button(conn_frame, "Username:", self.username_var, None, None, 0, 0, width=20)
         self.password_entry = self._create_label_entry_button(conn_frame, "Password:", self.password_var, None, None, 0, 2, width=20,
                                                              entry_options={"show": "•"}, include_checkbox=True)
-        self._create_label_entry_button(conn_frame, "Node IP:", self.node_ip_var, None, None, 2, 0, width=20)
-        self._create_label_entry_button(conn_frame, "Port:", self.port_var, None, None, 2, 2, width=20)
+        self._create_label_entry_button(conn_frame, "Node IP:", self.node_ip_var, None, None, 1, 0, width=20)
+        self._create_label_entry_button(conn_frame, "Port:", self.port_var, None, None, 1, 2, width=20)
     
         # Category
-        ttk.Label(conn_frame, text="Category:", style="TLabel").grid(row=3, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
+        ttk.Label(conn_frame, text="Category:", style="TLabel").grid(row=2, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
         category_combobox = ttk.Combobox(conn_frame, textvariable=self.category_var,
                                         values=["windows", "linux", "apache_access"],
                                         state="readonly", width=17)
-        category_combobox.grid(row=3, column=1, padx=PADX_DEFAULT, pady=PADY_DEFAULT, sticky="w")
+        category_combobox.grid(row=2, column=1, padx=PADX_DEFAULT, pady=PADY_DEFAULT, sticky="w")
         category_combobox.current(0)
+    
+        # Configure column weights for connection frame
+        conn_frame.columnconfigure(0, weight=0, minsize=100)  # Fixed width for labels
+        conn_frame.columnconfigure(1, weight=1)
+        conn_frame.columnconfigure(2, weight=0, minsize=100)  # Fixed width for second set of labels
+        conn_frame.columnconfigure(3, weight=1)
     
         # File selection
         file_frame = ttk.LabelFrame(upload_container, text="File Selection", style="TFrame")
@@ -149,22 +155,32 @@ class SigmaConverter:
         ttk.Radiobutton(mode_frame, text="Folder", variable=self.upload_mode_var,
                         value="folder", command=self.toggle_upload_mode, style="TRadiobutton").grid(row=0, column=1, padx=0, pady=0)
     
-        # Single file section
-        self.upload_single_frame = ttk.Frame(file_frame, style="TFrame")
-        self.upload_single_frame.grid(row=1, column=0, columnspan=3, sticky="ew", pady=5)
-        self._create_label_entry_button(self.upload_single_frame, "Input Sigma Rule File:",
-                                       self.upload_input_file_var, "Browse", self.select_upload_input_file, 0, 0)
+        # Single file section - place directly in file_frame
+        self._create_label_entry_button(file_frame, "Input Sigma Rule File:",
+                                       self.upload_input_file_var, "Browse", self.select_upload_input_file, 1, 0)
     
-        # Folder section
-        self.upload_folder_frame = ttk.Frame(file_frame, style="TFrame")
-        self.upload_folder_frame.grid(row=1, column=0, columnspan=3, sticky="ew", pady=5)
-        self.upload_folder_frame.grid_remove()
-        self._create_label_entry_button(self.upload_folder_frame, "Input Folder:",
-                                       self.upload_folder_var, "Browse", self.select_upload_folder, 0, 0)
+        # Store references to the widgets for toggle functionality
+        self.upload_single_widgets = []
+        for child in file_frame.winfo_children():
+            if child.grid_info().get('row') == 1:
+                self.upload_single_widgets.append(child)
+    
+        # Folder section - create but hide initially
+        self.upload_folder_label = ttk.Label(file_frame, text="Input Folder:", style="TLabel")
+        self.upload_folder_entry = ttk.Entry(file_frame, textvariable=self.upload_folder_var, width=50)
+        self.upload_folder_button = ttk.Button(file_frame, text="Browse", command=self.select_upload_folder)
+        
+        # Store folder widgets for toggle
+        self.upload_folder_widgets = [self.upload_folder_label, self.upload_folder_entry, self.upload_folder_button]
     
         # Field mapping file
         self._create_label_entry_button(file_frame, "Field Mapping File:",
                                        self.upload_mapping_file_var, "Browse", self.select_upload_mapping_file, 2, 0)
+    
+        # Configure column weights and minimum widths for file_frame
+        file_frame.columnconfigure(0, weight=0, minsize=200)  # Fixed width for labels
+        file_frame.columnconfigure(1, weight=1)
+        file_frame.columnconfigure(2, weight=0)
     
         # Upload button
         ttk.Button(upload_container, text="Upload to OpenSearch", command=self.start_upload_process).grid(
@@ -193,17 +209,26 @@ class SigmaConverter:
                                     yscrollcommand=results_scrollbar.set)
         self.results_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
         results_scrollbar.config(command=self.results_text.yview)
-
+    
     def toggle_upload_mode(self):
         """Toggle between single file and folder upload modes."""
         if self.upload_mode_var.get() == "single":
-            self.upload_folder_frame.grid_remove()
-            self.upload_single_frame.grid()
+            # Hide folder widgets
+            for widget in self.upload_folder_widgets:
+                widget.grid_remove()
+            # Show single file widgets
+            for widget in self.upload_single_widgets:
+                widget.grid()
         else:
-            self.upload_single_frame.grid_remove()
-            self.upload_folder_frame.grid()
+            # Hide single file widgets
+            for widget in self.upload_single_widgets:
+                widget.grid_remove()
+            # Show folder widgets
+            self.upload_folder_label.grid(row=1, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
+            self.upload_folder_entry.grid(row=1, column=1, sticky="ew", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
+            self.upload_folder_button.grid(row=1, column=2, padx=PADX_DEFAULT, pady=PADY_DEFAULT)
         self.root.update_idletasks()
-
+    
     def select_input_file(self):
         """Select a single Sigma rule file for conversion."""
         file_path = filedialog.askopenfilename(filetypes=[("YAML Files", "*.yml *.yaml")])
@@ -213,13 +238,13 @@ class SigmaConverter:
                 base_name = os.path.basename(file_path)
                 name_without_ext = os.path.splitext(base_name)[0]
                 self.file_name_var.set(name_without_ext)
-
+    
     def select_mapping_file(self):
         """Select a field mapping file for conversion."""
         file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
         if file_path:
             self.mapping_file_var.set(file_path)
-
+    
     def select_output_file(self):
         """Select an output file for conversion."""
         file_path = filedialog.asksaveasfilename(
