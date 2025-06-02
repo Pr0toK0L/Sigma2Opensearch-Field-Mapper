@@ -461,39 +461,39 @@ class SigmaConverter:
     def map_detection_fields(self, detection, field_mappings):
         """Map detection fields using the provided field mappings."""
         mapped_detection = {}
-
-        for selection_name, selection_conditions in detection.items():
-            print(f"Processing: {selection_name} -> {type(selection_conditions)}")  # Debug
-
+    
+        for section_name, section_conditions in detection.items():
+            print(f"Processing: {section_name} -> {type(section_conditions)}")  # Debug
+    
             # Skip condition - đây là logic rule, không cần map
-            if selection_name == 'condition':
-                mapped_detection[selection_name] = selection_conditions
+            if section_name == 'condition':
+                mapped_detection[section_name] = section_conditions
                 continue
             
-            # Xử lý selection (bất kể tên là gì: selection, selection_history, etc.)
-            if isinstance(selection_conditions, dict):
-                # Trường hợp selection là dict đơn giản
-                mapped_conditions = self._map_dict_fields(selection_conditions, field_mappings)
-                mapped_detection[selection_name] = mapped_conditions
-
-            elif isinstance(selection_conditions, list):
-                # Trường hợp selection là list (như selection_history)
+            # Xử lý tất cả các section khác (selection, filter, timeframe, etc.)
+            if isinstance(section_conditions, dict):
+                # Trường hợp section là dict đơn giản
+                mapped_conditions = self._map_dict_fields(section_conditions, field_mappings)
+                mapped_detection[section_name] = mapped_conditions
+    
+            elif isinstance(section_conditions, list):
+                # Trường hợp section là list (như selection_history, filter_list, etc.)
                 mapped_list = []
-                for item in selection_conditions:
+                for item in section_conditions:
                     if isinstance(item, dict):
                         mapped_item = self._map_dict_fields(item, field_mappings)
                         mapped_list.append(mapped_item)
                     else:
                         # Giữ nguyên các item không phải dict
                         mapped_list.append(item)
-                mapped_detection[selection_name] = mapped_list
-
+                mapped_detection[section_name] = mapped_list
+    
             else:
                 # Giữ nguyên các giá trị khác (string, number, etc.)
-                mapped_detection[selection_name] = selection_conditions
-
+                mapped_detection[section_name] = section_conditions
+    
         return mapped_detection
-
+    
     def _map_dict_fields(self, field_dict, field_mappings):
         """Helper function to map fields in a dictionary."""
         mapped_dict = {}
@@ -517,7 +517,7 @@ class SigmaConverter:
             print(f"  Mapped: {field_with_modifier} -> {mapped_field_with_modifier}")  # Debug
         
         return mapped_dict
-
+    
     def update_sigma_rule(self, input_file, output_file, field_mapping_file):
         """Update Sigma rule for Winlogbeat/Auditbeat format."""
         try:
@@ -526,10 +526,10 @@ class SigmaConverter:
             yaml_parser.preserve_quotes = True
             yaml_parser.indent(mapping=4, sequence=4, offset=2)
             yaml_parser.block_seq_indent = 2
-
+    
             with open(input_file, "r") as f:
                 sigma_rule = yaml_parser.load(f)
-
+    
             if "detection" in sigma_rule:
                 print(f"Original detection keys: {list(sigma_rule['detection'].keys())}")  # Debug
                 sigma_rule["detection"] = self.map_detection_fields(sigma_rule["detection"], field_mappings)
@@ -537,59 +537,129 @@ class SigmaConverter:
             else:
                 messagebox.showerror("Error", "No 'detection' section found in the Sigma rule.")
                 return False
-
+    
             with open(output_file, "w") as f:
                 yaml_parser.dump(sigma_rule, f)
-
+    
             return True
         except Exception as e:
             print(f"Detailed error: {e}")  # Debug
             messagebox.showerror("Error", f"An error occurred: {e}")
         return False
+    
+    # Nếu bạn muốn thêm logic để chỉ xử lý những section cụ thể, có thể sử dụng:
+    def map_detection_fields_with_whitelist(self, detection, field_mappings, processable_sections=None):
+        """
+        Map detection fields với danh sách các section được phép xử lý.
+        
+        Args:
+            detection: Detection section từ Sigma rule
+            field_mappings: Dictionary mapping các field names
+            processable_sections: List các section names cần xử lý. 
+                                Nếu None thì xử lý tất cả (trừ 'condition')
+        """
+        mapped_detection = {}
+        
+        # Mặc định xử lý tất cả trừ 'condition'
+        if processable_sections is None:
+            processable_sections = [key for key in detection.keys() if key != 'condition']
+    
+        for section_name, section_conditions in detection.items():
+            print(f"Processing: {section_name} -> {type(section_conditions)}")  # Debug
+    
+            # Skip condition hoặc những section không trong whitelist
+            if section_name == 'condition' or section_name not in processable_sections:
+                mapped_detection[section_name] = section_conditions
+                continue
+            
+            # Xử lý section được phép
+            if isinstance(section_conditions, dict):
+                mapped_conditions = self._map_dict_fields(section_conditions, field_mappings)
+                mapped_detection[section_name] = mapped_conditions
+            elif isinstance(section_conditions, list):
+                mapped_list = []
+                for item in section_conditions:
+                    if isinstance(item, dict):
+                        mapped_item = self._map_dict_fields(item, field_mappings)
+                        mapped_list.append(mapped_item)
+                    else:
+                        mapped_list.append(item)
+                mapped_detection[section_name] = mapped_list
+            else:
+                mapped_detection[section_name] = section_conditions
+    
+        return mapped_detection
 
     def generate_dql_query(self, sigma_rule, field_mappings):
         """Convert Sigma rule to OpenSearch DQL query."""
         try:
             if "detection" not in sigma_rule:
                 raise ValueError("No 'detection' section found in the Sigma rule")
-    
+
             detection = sigma_rule["detection"]
-            
-            # Lấy tất cả selections (selection, selection_history, etc.)
-            selections = {}
+
+            # Lấy tất cả sections trong detection, trừ condition
+            # Bao gồm cả selection, selection_*, filter, keyword, network, etc.
+            detection_sections = {}
+            reserved_keys = ['condition']  # Các key đặc biệt không phải detection sections
+
             for key, value in detection.items():
-                if key.startswith('selection') and key != 'condition':
-                    selections[key] = value
-            
-            if not selections:
-                raise ValueError("No selection sections found in the detection part")
-    
-            # Process each selection
-            selection_queries = {}
-            for selection_name, selection_data in selections.items():
-                query_parts = self._process_selection_data(selection_data, field_mappings)
-                selection_queries[selection_name] = query_parts
-    
+                if key not in reserved_keys:
+                    detection_sections[key] = value
+
+            if not detection_sections:
+                raise ValueError("No detection sections found in the detection part")
+
+            print(f"Found detection sections: {list(detection_sections.keys())}")  # Debug
+
+            # Process each detection section
+            section_queries = {}
+            for section_name, section_data in detection_sections.items():
+                query_parts = self._process_section_data(section_data, field_mappings)
+                section_queries[section_name] = query_parts
+                print(f"Processed {section_name}: {len(query_parts)} query parts")  # Debug
+
             # Parse condition to build final query
-            condition = detection.get("condition", "all of selection*")
-            final_query = self._build_final_query(selection_queries, condition)
-    
+            condition = detection.get("condition", self._build_default_condition(detection_sections))
+            print(f"Using condition: {condition}")  # Debug
+
+            final_query = self._build_final_query(section_queries, condition)
+
             return final_query
         except Exception as e:
             raise ValueError(f"Error generating DQL query: {e}")
-    
-    def _process_selection_data(self, selection_data, field_mappings):
-        """Process selection data (dict or list) and return query parts."""
+
+    def _build_default_condition(self, detection_sections):
+        """Build default condition when not specified."""
+        section_names = list(detection_sections.keys())
+
+        # If there's only one section, use it directly
+        if len(section_names) == 1:
+            return section_names[0]
+
+        # If there are sections starting with 'selection', prefer those
+        selection_sections = [name for name in section_names if name.startswith('selection')]
+        if selection_sections:
+            if len(selection_sections) == 1:
+                return selection_sections[0]
+            else:
+                return "all of selection*"
+
+        # Default: AND all sections
+        return f"all of ({', '.join(section_names)})"
+
+    def _process_section_data(self, section_data, field_mappings):
+        """Process section data (dict or list) and return query parts."""
         query_parts = []
-        
-        if isinstance(selection_data, dict):
-            # Simple dict case: selection
-            query_parts.extend(self._process_dict_fields(selection_data, field_mappings))
-            
-        elif isinstance(selection_data, list):
-            # List case: selection_history
+
+        if isinstance(section_data, dict):
+            # Simple dict case: most common sections
+            query_parts.extend(self._process_dict_fields(section_data, field_mappings))
+
+        elif isinstance(section_data, list):
+            # List case: complex sections with multiple conditions
             list_query_parts = []
-            for item in selection_data:
+            for item in section_data:
                 if isinstance(item, dict):
                     item_parts = self._process_dict_fields(item, field_mappings)
                     # Each dict in the list represents an OR condition within itself
@@ -600,19 +670,19 @@ class SigmaConverter:
                 else:
                     # Handle non-dict items if any
                     list_query_parts.append(str(item))
-            
+
             # Items in the list are ORed together
             if len(list_query_parts) > 1:
                 query_parts.append(f"({' OR '.join(list_query_parts)})")
             else:
                 query_parts.extend(list_query_parts)
-        
+
         return query_parts
-    
+
     def _process_dict_fields(self, field_dict, field_mappings):
         """Process dictionary fields and return query parts."""
         query_parts = []
-        
+
         for field, value in field_dict.items():
             # Map field name
             if "|" in field:
@@ -622,46 +692,46 @@ class SigmaConverter:
             else:
                 mapped_field = field_mappings.get(field, field)
                 mapped_field_with_modifier = mapped_field
-    
+
             # Generate query part based on modifier
             query_part = self._generate_field_query(mapped_field_with_modifier, value)
             query_parts.append(query_part)
-        
+
         return query_parts
-    
+
     def _generate_field_query(self, field, value):
         """Generate query part for a specific field and value."""
         if "|" in field:
             field_name, modifier = field.split("|", 1)
-            
+
             if modifier == "contains":
                 if isinstance(value, list):
                     conditions = [f"{field_name}:*{self._escape_dql_value(v)}*" for v in value]
                     return f"({' OR '.join(conditions)})"
                 else:
                     return f"({field_name}:*{self._escape_dql_value(value)}*)"
-                    
+
             elif modifier == "endswith":
                 if isinstance(value, list):
                     conditions = [f"{field_name}:*{self._escape_dql_value(v)}" for v in value]
                     return f"({' OR '.join(conditions)})"
                 else:
                     return f"({field_name}:*{self._escape_dql_value(value)})"
-                    
+
             elif modifier == "startswith":
                 if isinstance(value, list):
                     conditions = [f"{field_name}:{self._escape_dql_value(v)}*" for v in value]
                     return f"({' OR '.join(conditions)})"
                 else:
                     return f"({field_name}:{self._escape_dql_value(value)}*)"
-                    
+
             elif modifier == "all":
                 if isinstance(value, list):
                     conditions = [f"{field_name}:{self._escape_dql_value(v)}" for v in value]
                     return f"({' AND '.join(conditions)})"
                 else:
                     return f"({field_name}:{self._escape_dql_value(value)})"
-                    
+
             else:
                 # Default case for unknown modifiers
                 if isinstance(value, list):
@@ -676,98 +746,167 @@ class SigmaConverter:
                 return f"({' OR '.join(conditions)})"
             else:
                 return f"({field}:{self._escape_dql_value(value)})"
-    
+
     def _escape_dql_value(self, value):
         """Escape special characters in DQL values."""
         # Convert to string if not already
         str_value = str(value)
-        
+
         # Only escape truly problematic characters in OpenSearch DQL
         # Don't escape / as it's commonly used in paths and usually fine
         special_chars = [':', '"', '\\']
         for char in special_chars:
             if char in str_value:
                 str_value = str_value.replace(char, f'\\{char}')
-        
+
         # Quote if contains spaces
         if ' ' in str_value:
             str_value = f'"{str_value}"'
-        
+
         return str_value
-    
-    def _build_final_query(self, selection_queries, condition):
+
+    def _build_final_query(self, section_queries, condition):
         """Build final query based on condition."""
-        if not selection_queries:
+        if not section_queries:
             return ""
-        
+
         # Flatten all query parts
         all_parts = []
-        for selection_name, parts in selection_queries.items():
+        for section_name, parts in section_queries.items():
             if len(parts) > 1:
-                # Multiple parts within a selection are ANDed
+                # Multiple parts within a section are ANDed
                 combined_part = f"({' AND '.join(parts)})"
                 all_parts.append(combined_part)
             elif len(parts) == 1:
                 all_parts.append(parts[0])
-        
+
         if not all_parts:
             return ""
-        
+
         # Parse condition
         condition = condition.lower().strip()
-        
-        if "all of selection" in condition or condition == "selection":
-            # AND all selections together
-            if len(all_parts) > 1:
-                return f"({' AND '.join(all_parts)})"
+
+        # Handle specific section names
+        section_names = list(section_queries.keys())
+
+        # If condition is just a section name, return that section's query
+        if condition in [name.lower() for name in section_names]:
+            target_section = next(name for name in section_names if name.lower() == condition)
+            parts = section_queries[target_section]
+            if len(parts) > 1:
+                return f"({' AND '.join(parts)})"
             else:
-                return all_parts[0]
-                
+                return parts[0] if parts else ""
+
+        # Handle pattern matching conditions
+        if "all of selection" in condition:
+            # AND all sections that start with 'selection'
+            selection_parts = []
+            for section_name, parts in section_queries.items():
+                if section_name.startswith('selection'):
+                    if len(parts) > 1:
+                        selection_parts.append(f"({' AND '.join(parts)})")
+                    elif len(parts) == 1:
+                        selection_parts.append(parts[0])
+
+            if len(selection_parts) > 1:
+                return f"({' AND '.join(selection_parts)})"
+            elif len(selection_parts) == 1:
+                return selection_parts[0]
+            else:
+                # Fallback to all sections
+                if len(all_parts) > 1:
+                    return f"({' AND '.join(all_parts)})"
+                else:
+                    return all_parts[0] if all_parts else ""
+
         elif "any of selection" in condition:
-            # OR all selections together
-            if len(all_parts) > 1:
-                return f"({' OR '.join(all_parts)})"
+            # OR all sections that start with 'selection'
+            selection_parts = []
+            for section_name, parts in section_queries.items():
+                if section_name.startswith('selection'):
+                    if len(parts) > 1:
+                        selection_parts.append(f"({' AND '.join(parts)})")
+                    elif len(parts) == 1:
+                        selection_parts.append(parts[0])
+
+            if len(selection_parts) > 1:
+                return f"({' OR '.join(selection_parts)})"
+            elif len(selection_parts) == 1:
+                return selection_parts[0]
             else:
-                return all_parts[0]
-                
-        elif "1 of selection" in condition:
-            # OR all selections together (same as any)
-            if len(all_parts) > 1:
-                return f"({' OR '.join(all_parts)})"
-            else:
-                return all_parts[0]
+                # Fallback to all sections
+                if len(all_parts) > 1:
+                    return f"({' OR '.join(all_parts)})"
+                else:
+                    return all_parts[0] if all_parts else ""
+
+        # Handle explicit section combinations like "filter and network"
+        elif " and " in condition:
+            section_names_in_condition = [name.strip() for name in condition.split(" and ")]
+            matched_parts = []
+            for section_name in section_names_in_condition:
+                if section_name in section_queries:
+                    parts = section_queries[section_name]
+                    if len(parts) > 1:
+                        matched_parts.append(f"({' AND '.join(parts)})")
+                    elif len(parts) == 1:
+                        matched_parts.append(parts[0])
+
+            if matched_parts:
+                if len(matched_parts) > 1:
+                    return f"({' AND '.join(matched_parts)})"
+                else:
+                    return matched_parts[0]
+
+        elif " or " in condition:
+            section_names_in_condition = [name.strip() for name in condition.split(" or ")]
+            matched_parts = []
+            for section_name in section_names_in_condition:
+                if section_name in section_queries:
+                    parts = section_queries[section_name]
+                    if len(parts) > 1:
+                        matched_parts.append(f"({' AND '.join(parts)})")
+                    elif len(parts) == 1:
+                        matched_parts.append(parts[0])
+
+            if matched_parts:
+                if len(matched_parts) > 1:
+                    return f"({' OR '.join(matched_parts)})"
+                else:
+                    return matched_parts[0]
+
+        # Default: AND all sections
+        if len(all_parts) > 1:
+            return f"({' AND '.join(all_parts)})"
         else:
-            # Default: AND all selections
-            if len(all_parts) > 1:
-                return f"({' AND '.join(all_parts)})"
-            else:
-                return all_parts[0]
-    
+            return all_parts[0] if all_parts else ""
+
     def convert_sigma_to_dql(self, input_file, field_mapping_file):
         """Convert Sigma rule to OpenSearch DQL query and return the result."""
         try:
             field_mappings = self.load_field_mappings(field_mapping_file)
-    
+
             with open(input_file, 'r') as f:
                 sigma_rule = yaml.safe_load(f)
-    
+
             rule_title = sigma_rule.get('title', 'Unnamed Rule')
             rule_description = sigma_rule.get('description', 'No description')
-    
+
             dql_query = self.generate_dql_query(sigma_rule, field_mappings)
-    
+
             # Fix the timestamp issue
             from datetime import datetime
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
+
             output_content = f"""# DQL Query for: {rule_title}
     # Description: {rule_description}
     # Original Sigma rule: {os.path.basename(input_file)}
     # Converted on: {current_time}
-    
+
     {dql_query}
     """
-    
+
             return output_content, True
         except Exception as e:
             return f"Error: {str(e)}", False
