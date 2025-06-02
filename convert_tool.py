@@ -125,22 +125,16 @@ class SigmaConverter:
         self._create_label_entry_button(conn_frame, "Username:", self.username_var, None, None, 0, 0, width=20)
         self.password_entry = self._create_label_entry_button(conn_frame, "Password:", self.password_var, None, None, 0, 2, width=20,
                                                              entry_options={"show": "•"}, include_checkbox=True)
-        self._create_label_entry_button(conn_frame, "Node IP:", self.node_ip_var, None, None, 1, 0, width=20)
-        self._create_label_entry_button(conn_frame, "Port:", self.port_var, None, None, 1, 2, width=20)
+        self._create_label_entry_button(conn_frame, "Node IP:", self.node_ip_var, None, None, 2, 0, width=20)
+        self._create_label_entry_button(conn_frame, "Port:", self.port_var, None, None, 2, 2, width=20)
     
         # Category
-        ttk.Label(conn_frame, text="Category:", style="TLabel").grid(row=2, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
+        ttk.Label(conn_frame, text="Category:", style="TLabel").grid(row=3, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
         category_combobox = ttk.Combobox(conn_frame, textvariable=self.category_var,
                                         values=["windows", "linux", "apache_access"],
                                         state="readonly", width=17)
-        category_combobox.grid(row=2, column=1, padx=PADX_DEFAULT, pady=PADY_DEFAULT, sticky="w")
+        category_combobox.grid(row=3, column=1, padx=PADX_DEFAULT, pady=PADY_DEFAULT, sticky="w")
         category_combobox.current(0)
-    
-        # Configure column weights for connection frame
-        conn_frame.columnconfigure(0, weight=0, minsize=100)  # Fixed width for labels
-        conn_frame.columnconfigure(1, weight=1)
-        conn_frame.columnconfigure(2, weight=0, minsize=100)  # Fixed width for second set of labels
-        conn_frame.columnconfigure(3, weight=1)
     
         # File selection
         file_frame = ttk.LabelFrame(upload_container, text="File Selection", style="TFrame")
@@ -155,32 +149,22 @@ class SigmaConverter:
         ttk.Radiobutton(mode_frame, text="Folder", variable=self.upload_mode_var,
                         value="folder", command=self.toggle_upload_mode, style="TRadiobutton").grid(row=0, column=1, padx=0, pady=0)
     
-        # Single file section - place directly in file_frame
-        self._create_label_entry_button(file_frame, "Input Sigma Rule File:",
-                                       self.upload_input_file_var, "Browse", self.select_upload_input_file, 1, 0)
+        # Single file section
+        self.upload_single_frame = ttk.Frame(file_frame, style="TFrame")
+        self.upload_single_frame.grid(row=1, column=0, columnspan=3, sticky="ew", pady=5)
+        self._create_label_entry_button(self.upload_single_frame, "Input Sigma Rule File:",
+                                       self.upload_input_file_var, "Browse", self.select_upload_input_file, 0, 0)
     
-        # Store references to the widgets for toggle functionality
-        self.upload_single_widgets = []
-        for child in file_frame.winfo_children():
-            if child.grid_info().get('row') == 1:
-                self.upload_single_widgets.append(child)
-    
-        # Folder section - create but hide initially
-        self.upload_folder_label = ttk.Label(file_frame, text="Input Folder:", style="TLabel")
-        self.upload_folder_entry = ttk.Entry(file_frame, textvariable=self.upload_folder_var, width=50)
-        self.upload_folder_button = ttk.Button(file_frame, text="Browse", command=self.select_upload_folder)
-        
-        # Store folder widgets for toggle
-        self.upload_folder_widgets = [self.upload_folder_label, self.upload_folder_entry, self.upload_folder_button]
+        # Folder section
+        self.upload_folder_frame = ttk.Frame(file_frame, style="TFrame")
+        self.upload_folder_frame.grid(row=1, column=0, columnspan=3, sticky="ew", pady=5)
+        self.upload_folder_frame.grid_remove()
+        self._create_label_entry_button(self.upload_folder_frame, "Input Folder:",
+                                       self.upload_folder_var, "Browse", self.select_upload_folder, 0, 0)
     
         # Field mapping file
         self._create_label_entry_button(file_frame, "Field Mapping File:",
                                        self.upload_mapping_file_var, "Browse", self.select_upload_mapping_file, 2, 0)
-    
-        # Configure column weights and minimum widths for file_frame
-        file_frame.columnconfigure(0, weight=0, minsize=200)  # Fixed width for labels
-        file_frame.columnconfigure(1, weight=1)
-        file_frame.columnconfigure(2, weight=0)
     
         # Upload button
         ttk.Button(upload_container, text="Upload to OpenSearch", command=self.start_upload_process).grid(
@@ -209,26 +193,17 @@ class SigmaConverter:
                                     yscrollcommand=results_scrollbar.set)
         self.results_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
         results_scrollbar.config(command=self.results_text.yview)
-    
+
     def toggle_upload_mode(self):
         """Toggle between single file and folder upload modes."""
         if self.upload_mode_var.get() == "single":
-            # Hide folder widgets
-            for widget in self.upload_folder_widgets:
-                widget.grid_remove()
-            # Show single file widgets
-            for widget in self.upload_single_widgets:
-                widget.grid()
+            self.upload_folder_frame.grid_remove()
+            self.upload_single_frame.grid()
         else:
-            # Hide single file widgets
-            for widget in self.upload_single_widgets:
-                widget.grid_remove()
-            # Show folder widgets
-            self.upload_folder_label.grid(row=1, column=0, sticky="w", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
-            self.upload_folder_entry.grid(row=1, column=1, sticky="ew", padx=PADX_DEFAULT, pady=PADY_DEFAULT)
-            self.upload_folder_button.grid(row=1, column=2, padx=PADX_DEFAULT, pady=PADY_DEFAULT)
+            self.upload_single_frame.grid_remove()
+            self.upload_folder_frame.grid()
         self.root.update_idletasks()
-    
+
     def select_input_file(self):
         """Select a single Sigma rule file for conversion."""
         file_path = filedialog.askopenfilename(filetypes=[("YAML Files", "*.yml *.yaml")])
@@ -238,13 +213,13 @@ class SigmaConverter:
                 base_name = os.path.basename(file_path)
                 name_without_ext = os.path.splitext(base_name)[0]
                 self.file_name_var.set(name_without_ext)
-    
+
     def select_mapping_file(self):
         """Select a field mapping file for conversion."""
         file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
         if file_path:
             self.mapping_file_var.set(file_path)
-    
+
     def select_output_file(self):
         """Select an output file for conversion."""
         file_path = filedialog.asksaveasfilename(
@@ -486,24 +461,65 @@ class SigmaConverter:
     def map_detection_fields(self, detection, field_mappings):
         """Map detection fields using the provided field mappings."""
         mapped_detection = {}
+
         for selection_name, selection_conditions in detection.items():
-            if isinstance(selection_conditions, dict):
-                mapped_conditions = {}
-                for field_with_modifier, value in selection_conditions.items():
-                    if "|" in field_with_modifier:
-                        field_name, field_modifier = field_with_modifier.split("|", 1)
-                    else:
-                        field_name, field_modifier = field_with_modifier, ""
-                    mapped_field_name = field_mappings.get(field_name, field_name)
-                    mapped_field_with_modifier = f"{mapped_field_name}|{field_modifier}" if field_modifier else mapped_field_name
-                    mapped_conditions[mapped_field_with_modifier] = value
-                mapped_detection[selection_name] = mapped_conditions
-            else:
+            print(f"Processing: {selection_name} -> {type(selection_conditions)}")  # Debug
+
+            # Skip condition - đây là logic rule, không cần map
+            if selection_name == 'condition':
                 mapped_detection[selection_name] = selection_conditions
+                continue
+            
+            # Xử lý selection (bất kể tên là gì: selection, selection_history, etc.)
+            if isinstance(selection_conditions, dict):
+                # Trường hợp selection là dict đơn giản
+                mapped_conditions = self._map_dict_fields(selection_conditions, field_mappings)
+                mapped_detection[selection_name] = mapped_conditions
+
+            elif isinstance(selection_conditions, list):
+                # Trường hợp selection là list (như selection_history)
+                mapped_list = []
+                for item in selection_conditions:
+                    if isinstance(item, dict):
+                        mapped_item = self._map_dict_fields(item, field_mappings)
+                        mapped_list.append(mapped_item)
+                    else:
+                        # Giữ nguyên các item không phải dict
+                        mapped_list.append(item)
+                mapped_detection[selection_name] = mapped_list
+
+            else:
+                # Giữ nguyên các giá trị khác (string, number, etc.)
+                mapped_detection[selection_name] = selection_conditions
+
         return mapped_detection
 
+    def _map_dict_fields(self, field_dict, field_mappings):
+        """Helper function to map fields in a dictionary."""
+        mapped_dict = {}
+        for field_with_modifier, value in field_dict.items():
+            # Tách field name và modifier
+            if "|" in field_with_modifier:
+                field_name, field_modifier = field_with_modifier.split("|", 1)
+            else:
+                field_name, field_modifier = field_with_modifier, ""
+            
+            # Map field name
+            mapped_field_name = field_mappings.get(field_name, field_name)
+            
+            # Tạo lại field với modifier nếu có
+            if field_modifier:
+                mapped_field_with_modifier = f"{mapped_field_name}|{field_modifier}"
+            else:
+                mapped_field_with_modifier = mapped_field_name
+            
+            mapped_dict[mapped_field_with_modifier] = value
+            print(f"  Mapped: {field_with_modifier} -> {mapped_field_with_modifier}")  # Debug
+        
+        return mapped_dict
+
     def update_sigma_rule(self, input_file, output_file, field_mapping_file):
-        """Update Sigma rule for Winlogbeat format."""
+        """Update Sigma rule for Winlogbeat/Auditbeat format."""
         try:
             field_mappings = self.load_field_mappings(field_mapping_file)
             yaml_parser = YAML()
@@ -515,7 +531,9 @@ class SigmaConverter:
                 sigma_rule = yaml_parser.load(f)
 
             if "detection" in sigma_rule:
+                print(f"Original detection keys: {list(sigma_rule['detection'].keys())}")  # Debug
                 sigma_rule["detection"] = self.map_detection_fields(sigma_rule["detection"], field_mappings)
+                print(f"Mapped detection keys: {list(sigma_rule['detection'].keys())}")    # Debug
             else:
                 messagebox.showerror("Error", "No 'detection' section found in the Sigma rule.")
                 return False
@@ -525,99 +543,231 @@ class SigmaConverter:
 
             return True
         except Exception as e:
+            print(f"Detailed error: {e}")  # Debug
             messagebox.showerror("Error", f"An error occurred: {e}")
-            return False
+        return False
 
     def generate_dql_query(self, sigma_rule, field_mappings):
         """Convert Sigma rule to OpenSearch DQL query."""
         try:
             if "detection" not in sigma_rule:
                 raise ValueError("No 'detection' section found in the Sigma rule")
-
-            if "selection" not in sigma_rule["detection"]:
-                raise ValueError("No 'selection' section found in the detection part")
-
-            selection = sigma_rule["detection"]["selection"]
-
-            mapped_selection = {}
-            for field, value in selection.items():
-                if "|" in field:
-                    field_name, modifier = field.split("|", 1)
-                    mapped_field = field_mappings.get(field_name, field_name)
-                    mapped_field_with_modifier = f"{mapped_field}|{modifier}"
-                else:
-                    mapped_field = field_mappings.get(field, field)
-                    mapped_field_with_modifier = mapped_field
-
-                mapped_selection[mapped_field_with_modifier] = value
-
-            query_parts = []
-
-            for field, value in mapped_selection.items():
-                if "|" in field:
-                    field_name, modifier = field.split("|", 1)
-
-                    if modifier == "contains":
-                        if isinstance(value, list):
-                            conditions = [f"{field_name}:*{v}*" for v in value]
-                            query_part = f"({' OR '.join(conditions)})"
-                        else:
-                            query_part = f"({field_name}:*{value}*)"
-                    elif modifier == "endswith":
-                        if isinstance(value, list):
-                            conditions = [f"{field_name}:*{v}" for v in value]
-                            query_part = f"({' OR '.join(conditions)})"
-                        else:
-                            query_part = f"({field_name}:*{value})"
-                    elif modifier == "startswith":
-                        if isinstance(value, list):
-                            conditions = [f"{field_name}:{v}*" for v in value]
-                            query_part = f"({' OR '.join(conditions)})"
-                        else:
-                            query_part = f"({field_name}:{value}*)"
-                    else:
-                        query_part = f"({field_name}:{value})"
-                else:
-                    if isinstance(value, list):
-                        conditions = [f"{field}:{v}" for v in value]
-                        query_part = f"({' OR '.join(conditions)})"
-                    else:
-                        query_part = f"({field}:{value})"
-
-                query_parts.append(query_part)
-
-            condition = sigma_rule["detection"].get("condition", "all of selection")
-
-            if condition == "all of selection" or condition == "selection":
-                final_query = " AND ".join(query_parts)
-            elif condition == "any of selection":
-                final_query = " OR ".join(query_parts)
-            else:
-                final_query = " AND ".join(query_parts)
-
+    
+            detection = sigma_rule["detection"]
+            
+            # Lấy tất cả selections (selection, selection_history, etc.)
+            selections = {}
+            for key, value in detection.items():
+                if key.startswith('selection') and key != 'condition':
+                    selections[key] = value
+            
+            if not selections:
+                raise ValueError("No selection sections found in the detection part")
+    
+            # Process each selection
+            selection_queries = {}
+            for selection_name, selection_data in selections.items():
+                query_parts = self._process_selection_data(selection_data, field_mappings)
+                selection_queries[selection_name] = query_parts
+    
+            # Parse condition to build final query
+            condition = detection.get("condition", "all of selection*")
+            final_query = self._build_final_query(selection_queries, condition)
+    
             return final_query
         except Exception as e:
             raise ValueError(f"Error generating DQL query: {e}")
-
+    
+    def _process_selection_data(self, selection_data, field_mappings):
+        """Process selection data (dict or list) and return query parts."""
+        query_parts = []
+        
+        if isinstance(selection_data, dict):
+            # Simple dict case: selection
+            query_parts.extend(self._process_dict_fields(selection_data, field_mappings))
+            
+        elif isinstance(selection_data, list):
+            # List case: selection_history
+            list_query_parts = []
+            for item in selection_data:
+                if isinstance(item, dict):
+                    item_parts = self._process_dict_fields(item, field_mappings)
+                    # Each dict in the list represents an OR condition within itself
+                    if len(item_parts) > 1:
+                        list_query_parts.append(f"({' AND '.join(item_parts)})")
+                    else:
+                        list_query_parts.extend(item_parts)
+                else:
+                    # Handle non-dict items if any
+                    list_query_parts.append(str(item))
+            
+            # Items in the list are ORed together
+            if len(list_query_parts) > 1:
+                query_parts.append(f"({' OR '.join(list_query_parts)})")
+            else:
+                query_parts.extend(list_query_parts)
+        
+        return query_parts
+    
+    def _process_dict_fields(self, field_dict, field_mappings):
+        """Process dictionary fields and return query parts."""
+        query_parts = []
+        
+        for field, value in field_dict.items():
+            # Map field name
+            if "|" in field:
+                field_name, modifier = field.split("|", 1)
+                mapped_field = field_mappings.get(field_name, field_name)
+                mapped_field_with_modifier = f"{mapped_field}|{modifier}"
+            else:
+                mapped_field = field_mappings.get(field, field)
+                mapped_field_with_modifier = mapped_field
+    
+            # Generate query part based on modifier
+            query_part = self._generate_field_query(mapped_field_with_modifier, value)
+            query_parts.append(query_part)
+        
+        return query_parts
+    
+    def _generate_field_query(self, field, value):
+        """Generate query part for a specific field and value."""
+        if "|" in field:
+            field_name, modifier = field.split("|", 1)
+            
+            if modifier == "contains":
+                if isinstance(value, list):
+                    conditions = [f"{field_name}:*{self._escape_dql_value(v)}*" for v in value]
+                    return f"({' OR '.join(conditions)})"
+                else:
+                    return f"({field_name}:*{self._escape_dql_value(value)}*)"
+                    
+            elif modifier == "endswith":
+                if isinstance(value, list):
+                    conditions = [f"{field_name}:*{self._escape_dql_value(v)}" for v in value]
+                    return f"({' OR '.join(conditions)})"
+                else:
+                    return f"({field_name}:*{self._escape_dql_value(value)})"
+                    
+            elif modifier == "startswith":
+                if isinstance(value, list):
+                    conditions = [f"{field_name}:{self._escape_dql_value(v)}*" for v in value]
+                    return f"({' OR '.join(conditions)})"
+                else:
+                    return f"({field_name}:{self._escape_dql_value(value)}*)"
+                    
+            elif modifier == "all":
+                if isinstance(value, list):
+                    conditions = [f"{field_name}:{self._escape_dql_value(v)}" for v in value]
+                    return f"({' AND '.join(conditions)})"
+                else:
+                    return f"({field_name}:{self._escape_dql_value(value)})"
+                    
+            else:
+                # Default case for unknown modifiers
+                if isinstance(value, list):
+                    conditions = [f"{field_name}:{self._escape_dql_value(v)}" for v in value]
+                    return f"({' OR '.join(conditions)})"
+                else:
+                    return f"({field_name}:{self._escape_dql_value(value)})"
+        else:
+            # No modifier
+            if isinstance(value, list):
+                conditions = [f"{field}:{self._escape_dql_value(v)}" for v in value]
+                return f"({' OR '.join(conditions)})"
+            else:
+                return f"({field}:{self._escape_dql_value(value)})"
+    
+    def _escape_dql_value(self, value):
+        """Escape special characters in DQL values."""
+        # Convert to string if not already
+        str_value = str(value)
+        
+        # Only escape truly problematic characters in OpenSearch DQL
+        # Don't escape / as it's commonly used in paths and usually fine
+        special_chars = [':', '"', '\\']
+        for char in special_chars:
+            if char in str_value:
+                str_value = str_value.replace(char, f'\\{char}')
+        
+        # Quote if contains spaces
+        if ' ' in str_value:
+            str_value = f'"{str_value}"'
+        
+        return str_value
+    
+    def _build_final_query(self, selection_queries, condition):
+        """Build final query based on condition."""
+        if not selection_queries:
+            return ""
+        
+        # Flatten all query parts
+        all_parts = []
+        for selection_name, parts in selection_queries.items():
+            if len(parts) > 1:
+                # Multiple parts within a selection are ANDed
+                combined_part = f"({' AND '.join(parts)})"
+                all_parts.append(combined_part)
+            elif len(parts) == 1:
+                all_parts.append(parts[0])
+        
+        if not all_parts:
+            return ""
+        
+        # Parse condition
+        condition = condition.lower().strip()
+        
+        if "all of selection" in condition or condition == "selection":
+            # AND all selections together
+            if len(all_parts) > 1:
+                return f"({' AND '.join(all_parts)})"
+            else:
+                return all_parts[0]
+                
+        elif "any of selection" in condition:
+            # OR all selections together
+            if len(all_parts) > 1:
+                return f"({' OR '.join(all_parts)})"
+            else:
+                return all_parts[0]
+                
+        elif "1 of selection" in condition:
+            # OR all selections together (same as any)
+            if len(all_parts) > 1:
+                return f"({' OR '.join(all_parts)})"
+            else:
+                return all_parts[0]
+        else:
+            # Default: AND all selections
+            if len(all_parts) > 1:
+                return f"({' AND '.join(all_parts)})"
+            else:
+                return all_parts[0]
+    
     def convert_sigma_to_dql(self, input_file, field_mapping_file):
         """Convert Sigma rule to OpenSearch DQL query and return the result."""
         try:
             field_mappings = self.load_field_mappings(field_mapping_file)
-
+    
             with open(input_file, 'r') as f:
                 sigma_rule = yaml.safe_load(f)
-
+    
             rule_title = sigma_rule.get('title', 'Unnamed Rule')
-
+            rule_description = sigma_rule.get('description', 'No description')
+    
             dql_query = self.generate_dql_query(sigma_rule, field_mappings)
-
+    
+            # Fix the timestamp issue
+            from datetime import datetime
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
             output_content = f"""# DQL Query for: {rule_title}
+    # Description: {rule_description}
     # Original Sigma rule: {os.path.basename(input_file)}
-    # Converted on: {self.root.tk.call('clock', 'format', 'clock seconds', '-format', '%Y-%m-%d %H:%M:%S')}
-
+    # Converted on: {current_time}
+    
     {dql_query}
     """
-
+    
             return output_content, True
         except Exception as e:
             return f"Error: {str(e)}", False
