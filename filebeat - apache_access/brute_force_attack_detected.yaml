@@ -1,0 +1,24 @@
+id: 5V57TZUBYZ3Rh3IZG9N3
+logsource:
+  product: apache_access
+title: brute force attack detected
+description: brute force attack detected
+tags: 
+  - attack.T1110
+falsepositives: []
+level: high
+status: experimental
+references:
+  - >-
+    https://security.stackexchange.com/questions/202424/what-are-the-common-features-to-identify-brute-force-attack-from-apache-log-file
+author: hoang.nguyen
+detection:
+  condition: selection and not selection2
+  selection:
+    apache_method:
+      - POST
+    apache_path|contains:
+      - login
+  selection2:
+    apache_code:
+      - 200

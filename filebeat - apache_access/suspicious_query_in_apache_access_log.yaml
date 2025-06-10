@@ -1,0 +1,21 @@
+title: Suspicious Query Patterns in Apache Access Logs
+id: 123e4567-e89b-12d3-a456-426614174000
+status: experimental
+description: Detects suspicious query patterns commonly used by web shells in Apache access logs.
+author: hoang.nguyen
+tags:
+  - attack.execution
+  - attack.t1059.001
+logsource:
+  product: apache_access
+detection:
+  selection:
+    apache_path|contains:
+      - 'cmd='
+      - 'exec='
+      - 'shell='
+      - 'command='
+  condition: selection
+falsepositives:
+  - Legitimate web applications using similar query parameters
+level: high
