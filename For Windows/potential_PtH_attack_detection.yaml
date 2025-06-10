@@ -1,0 +1,22 @@
+title: Potential Pass-the-Hash Attack Detection
+id: 123e4567-e89b-12d3-a456-426614174000
+status: experimental
+description: Detects successful network logons that may indicate Pass-the-Hash attacks using NTLMv2 authentication.
+references:
+  - https://www.cyberark.com/resources/threat-research-blog/detecting-pass-the-hash-with-windows-event-viewer
+author: hoang.nguyen
+tags:
+  - attack.t1075
+  - attack.lateral_movement
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code: 4624
+    winlog.event_data.LogonType: 3
+    winlog.event_data.LmPackageName|contains: 'NTLM'
+  condition: selection
+falsepositives:
+  - Legitimate use of NTLM authentication in the environment
+  - Applications or services that authenticate using NTLM over the network
+level: high

@@ -1,0 +1,21 @@
+title: Registry Ownership Takeover on DCOM AppID Key (RemoteMonologue Setup)
+status: experimental
+description: Detects use of SeTakeOwnershipPrivilege on DCOM AppID registry keys, commonly used in DCOM NTLM coercion attacks (e.g., RemoteMonologue)
+author: hoang.nguyen
+logsource:
+  product: windows
+  service: security
+  category: process_access
+detection:
+  selection:
+    EventID: 4674
+    PrivilegeList|contains: 'SeTakeOwnershipPrivilege'
+    ObjectName|contains: 'AppID'
+  condition: selection
+level: high
+tags:
+  - attack.privilege_escalation
+  - attack.t1055
+  - attack.t1557.002
+falsepositives:
+  - Legitimate COM configuration by sysadmin (rare)

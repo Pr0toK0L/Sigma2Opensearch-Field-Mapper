@@ -1,0 +1,29 @@
+title: NTDS Database Created and Detached
+id: a1b2c3d4-5678-9abc-def0-123456789abc
+name: ntds_database_created_and_detached
+status: experimental
+description: |
+  Detects when the NTDS database is created or detached, which can indicate an attempt 
+  to copy the NTDS.dit file for credential dumping.
+references:
+  - https://attack.mitre.org/techniques/T1003/003/
+  - https://www.microsoft.com/en-us/security/blog/2021/06/22/defending-against-active-directory-attacks/
+author: hoang.nguyen
+date: 2025-02-11
+logsource:
+  product: windows
+  service: application
+detection:
+  selection:
+    EventID:
+      - 325  # NTDS Database Created
+      - 327  # NTDS Database Detached
+    Source: "ESENT"
+  condition: selection
+falsepositives:
+  - Legitimate backup or database maintenance activities
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1003.003
+  - windows

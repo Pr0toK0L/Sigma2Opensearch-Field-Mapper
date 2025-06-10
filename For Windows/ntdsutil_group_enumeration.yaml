@@ -1,0 +1,38 @@
+title: NTDSUTIL Group Enumeration
+id: 5f7c9e21-1234-4abc-b567-890dfe654321
+name: ntdsutil_group_enumeration
+status: experimental
+description: |
+  Detects suspicious NTDSUTIL activity where an attacker attempts to enumerate 
+  privileged groups such as Administrator and Backup Operators, 
+  potentially as part of credential dumping or privilege escalation.
+references:
+  - https://attack.mitre.org/techniques/T1003/003/
+  - https://www.microsoft.com/en-us/security/blog/2021/06/22/defending-against-active-directory-attacks/
+author: hoang.nguyen
+date: 2025-02-11
+logsource:
+  product: windows
+  service: security
+detection:
+  selection1:
+    EventID: 4688
+    ProcessName|endswith: 
+      - "ntdsutil.exe"
+      - "vssadmin.exe"
+    ParentProcessName|endswith:
+      - "cmd.exe"
+      - "powershell.exe"
+  selection2:
+    EventID: 4799
+    TargetUserName|contains:
+      - "Administrator"
+      - "Backup Operators"
+  condition: selection1 or selection2
+falsepositives:
+  - Legitimate administrative activities for Active Directory maintenance
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1003.003
+  - windows

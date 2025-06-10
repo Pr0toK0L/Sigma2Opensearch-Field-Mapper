@@ -1,0 +1,30 @@
+title: General Windows Firewall Tampering Detection
+status: experimental
+description: Detects suspicious modifications to Windows Firewall settings, including disabling, rule changes, or logging manipulation.
+author: hoang.nguyen
+references:
+  - https://attack.mitre.org/techniques/T1562/004/
+tags:
+  - attack.defense_evasion
+  - attack.t1562.004
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    winlog.event_data.CommandLine|contains:
+      - 'advfirewall'
+      - 'firewall'
+      - 'Set-NetFirewallProfile'
+      - 'DisableRealtimeMonitoring'
+      - 'DisableAntiSpyware'
+  condition: selection and not filter
+  filter:
+    winlog.event_data.Image|endswith:
+      - '\mmc.exe'
+      - '\explorer.exe'
+      - '\vpnclient.exe'
+falsepositives:
+  - Administrative users configuring the firewall
+  - Legitimate use of firewall management tools
+level: medium

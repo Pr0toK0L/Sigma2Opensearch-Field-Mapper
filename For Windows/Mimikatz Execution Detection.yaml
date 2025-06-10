@@ -1,0 +1,36 @@
+title: Mimikatz Execution Detection
+status: experimental
+description: Detects potential execution of Mimikatz or Mimikatz-like tools used for credential dumping or lateral movement.
+author: hoang.nguyen
+references:
+  - https://attack.mitre.org/techniques/T1003/
+  - https://github.com/gentilkiwi/mimikatz
+tags:
+  - attack.credential_dumping
+  - attack.t1003
+logsource:
+  product: windows
+detection:
+  selection_1:
+    winlog.event_data.OriginalFileName|endswith:
+      - '\mimikatz.exe'
+      - '\mimikatz_x64.exe'
+      - '\mimikatz_32.exe'
+      - '\mimikatz_trunk.exe'
+      - '\mimikatz_win32.exe'
+      - '\mimikatz_win64.exe'
+  selection_2:
+    winlog.event_data.CommandLine|contains:
+      - 'sekurlsa'
+      - 'dump'
+      - 'lsa'
+      - 'wdigest'
+      - 'msv'
+      - 'kerberos'
+      - 'logonpasswords'
+      - 'pass'
+  condition: selection_1 or selection_2
+falsepositives:
+  - Penetration testers or red teamers running Mimikatz for authorized testing
+  - Legitimate administrators using Mimikatz for diagnostic purposes
+level: high

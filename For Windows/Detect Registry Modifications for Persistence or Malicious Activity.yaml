@@ -1,0 +1,26 @@
+title: Detect Registry Startup Modifications 
+description: |
+  This rule detects modifications to the registry, which could be indicative of persistence mechanisms being established or modified.
+  This is often used in malicious activities to maintain persistence, execute malware, or escalate privileges.
+status: experimental
+author: hoang.nguyen
+references:
+    - https://attack.mitre.org/techniques/T1071/
+    - https://attack.mitre.org/techniques/T1546/
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code:
+      - 13
+    winlog.event_data.TargetObject|contains:
+      - '\Software\Microsoft\Windows\CurrentVersion\Run'
+      - '\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+      - '\Software\Classes\ms-settings\shell\open\command'
+      - '\Software\Microsoft\Windows\CurrentVersion\Policies\System'
+      - '\System\CurrentControlSet\Services'
+  condition: selection
+falsepositives:
+  - Legitimate software installations that modify registry keys for persistence
+  - Administrative tasks that require registry modifications
+level: high

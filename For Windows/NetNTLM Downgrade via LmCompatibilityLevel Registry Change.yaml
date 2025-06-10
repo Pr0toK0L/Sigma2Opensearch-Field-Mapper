@@ -1,0 +1,23 @@
+title: NetNTLM Downgrade via LmCompatibilityLevel Registry Change
+status: experimental
+description: Detects modification or deletion of the LmCompatibilityLevel registry key, often used in NTLM downgrade attacks such as RemoteMonologue
+author: hoang.nguyen2
+logsource:
+  product: windows
+  category: registry_event
+  service: sysmon
+detection:
+  selection:
+    TargetObject|contains: 'LmCompatibilityLevel'
+  selection_1:
+    EventID: 12
+  selection_2:
+    EventID: 13
+  condition: selection and (selection_1 or selection_2)
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1557.002
+  - attack.defense_evasion
+falsepositives:
+  - Legitimate hardening by system administrator (rare)

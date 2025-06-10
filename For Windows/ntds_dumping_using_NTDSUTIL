@@ -1,0 +1,27 @@
+title: NTDS Dumping via NTDSUTIL
+id: 1234abcd-5678-efgh-9101-ijklmnopqrst
+status: stable
+description: Detects suspicious NTDS dumping activity using NTDSUTIL.exe
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventID: 325
+        Source: "ESENT"
+    selection2:
+        EventID: 327
+        Source: "ESENT"
+    selection3:
+        EventID: 7036
+        Source: "Service Control Manager"
+    selection4:
+        EventID: 4799
+        Source: "Security"
+        ProcessName: "ntdsutil.exe"
+        EnumerationCount: ">50"
+    timeframe: 10m
+    condition: selection1 and selection2 and selection3 and selection4
+falsepositives:
+  - Legitimate administrative backup activities
+level: high

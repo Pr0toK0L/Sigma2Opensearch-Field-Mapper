@@ -1,0 +1,19 @@
+title: Detect Registry Key Behavior
+description: |
+  This rule detects registry key modifications, additions, and deletions. Such activities are commonly used by attackers for persistence, privilege escalation, or evasion techniques.
+status: experimental
+author: hoang.nguyen
+references:
+    - https://attack.mitre.org/techniques/T1071/
+    - https://attack.mitre.org/techniques/T1546/
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code:
+      - 12 
+      - 13
+      - 14
+  condition: selection
+falsepositives:
+level: high

@@ -1,0 +1,16 @@
+title: Detect User Creation on Windows
+description: |
+  This rule detects the creation of a new user account on Windows.
+status: experimental
+author: hoang.nguyen
+date: 2025-04-11
+references:
+    - https://attack.mitre.org/techniques/T1078/
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code: 4720
+  condition: selection
+falsepositives:
+level: high

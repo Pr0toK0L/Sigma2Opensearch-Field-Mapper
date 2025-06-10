@@ -1,0 +1,32 @@
+title: Windows Defender Disable Attempt
+status: experimental
+description: Detects commands or registry changes that disable Windows Defender.
+author: hoang.nguyen
+references:
+  - https://attack.mitre.org/techniques/T1562/001/ 
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    winlog.event_data.ScriptBlockText|contains:
+      - 'DisableIOAVProtection'
+      - 'DisableAntiSpyware'
+      - 'DisableRealtimeMonitoring'
+      - 'sc stop WinDefend'
+      - 'sc config WinDefend start= disabled'
+      - 'net stop WinDefend'
+      - 'Remove-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender" -Name "DisableAntiSpyware"'
+  selection_2:
+    winlog.event_data.Image|endswith:
+      - sc.exe
+    winlog.event_data.CommandLine|contains:
+      - 'stop WindDefend'
+      - 'WinDefend'
+      - 'disabled'
+  condition: selection or selection_2
+falsepositives:
+level: high

@@ -1,0 +1,21 @@
+title: Suspicious Remote Logon with Explicit Credentials
+id: 941e5c45-cda7-4864-8cea-bbb7458d194a
+status: experimental
+description: Detects suspicious processes logging on with explicit credentials
+author: hoang.nguyen
+tags:
+  - attack.t1078
+  - attack.lateral-movement
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code: 4648
+  filter:
+    winlog.event_data.SubjectUserName|endswith: '$'  # Exclude computer accounts
+  condition: selection and not filter
+falsepositives:
+  - Scheduled tasks
+  - Backup software
+  - IT management software
+level: medium

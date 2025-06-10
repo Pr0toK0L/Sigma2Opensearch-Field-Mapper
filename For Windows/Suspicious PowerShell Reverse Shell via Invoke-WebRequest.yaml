@@ -1,0 +1,20 @@
+title: Suspicious PowerShell query
+description: Detects potential reverse shell or C2 communication over HTTP using PowerShell Invoke-WebRequest and Invoke-Expression
+status: experimental
+author: hoang.nguyen
+logsource:
+  product: windows
+detection:
+  selection:
+    event.code: 4104
+    winlog.event_data.ScriptBlockText|contains:
+      - 'Invoke-WebRequest'
+      - 'Invoke-Expression'
+      - 'iex'
+      - 'Authorization'
+      - 'sleep'
+  condition: selection
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001

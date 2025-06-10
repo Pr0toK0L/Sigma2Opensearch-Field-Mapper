@@ -1,0 +1,28 @@
+title: VSS Service Started
+id: 3a4b5c6d-7890-ef12-3456-7890abcdef12
+name: vss_service_started
+status: experimental
+description: |
+  Detects when the Volume Shadow Copy Service (VSS) is started. 
+  Attackers may abuse VSS to create system snapshots and extract NTDS.dit for credential dumping.
+references:
+  - https://attack.mitre.org/techniques/T1003/003/
+  - https://learn.microsoft.com/en-us/windows-server/backup/volume-shadow-copy-service
+author: hoang.nguyen
+date: 2025-02-11
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7036
+    Source: "Service Control Manager"
+    Message|contains: "Volume Shadow Copy"
+  condition: selection
+falsepositives:
+  - Legitimate backup operations from Windows Backup or security software
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1003.003
+  - windows
