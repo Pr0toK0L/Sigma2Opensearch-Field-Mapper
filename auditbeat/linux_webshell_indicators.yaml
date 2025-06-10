@@ -1,0 +1,35 @@
+title: Linux Webshell Indicators
+id: 818f7b24-0fba-4c49-a073-8b755573b9c7
+status: experimental
+description: Detects suspicious subprocesses of web server processes
+references:
+  - https://www.acunetix.com/blog/articles/web-shells-101-using-php-introduction-web-shells-part-2/
+author: hoang.nguyen
+tags:
+  - attack.persistence
+  - attack.t1505.003
+logsource:
+  product: linux
+detection:
+  selection:
+    process.working_directory|contains:
+      - '/var/www/html'
+    user.name|all:
+      - 'www-data'
+    process.args|contains:
+      - 'whoami'
+      - 'ifconfig'
+      - 'ip'
+      - 'uname'
+      - 'cat'
+      - 'crontab'
+      - 'hostname'
+      - 'iptables'
+      - 'netstat'
+      - 'pwd'
+      - 'route'
+      - 'net'
+  condition: selection
+falsepositives:
+  - Web applications that invoke Linux command line tools
+level: high

@@ -1,0 +1,22 @@
+title: Scheduled Task/Job At
+status: experimental
+description: |
+  Detects the use of at/atd which are utilities that are used to schedule tasks.
+  They are often abused by adversaries to maintain persistence or to perform task scheduling for initial or recurring execution of malicious code
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.002/T1053.002.md
+author: hoang.nguyen
+tags:
+    - attack.persistence
+    - attack.t1053.002
+logsource:
+    product: linux
+detection:
+    selection:
+        process.executable|endswith:
+            - '/at'
+            - '/atd'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: low

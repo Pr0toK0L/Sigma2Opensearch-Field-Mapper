@@ -1,0 +1,93 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Protocol Tunneling via Chisel Client
+description: >-
+  This rule monitors for common command line flags leveraged by the Chisel
+  client utility followed by a connection attempt.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1572
+  - attack.auditbeat
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions. 
+  - >-
+    If this activity is related to a system administrator or developer who uses
+    port tunneling for benign purposes, consider adding exceptions for specific
+    user accounts or hosts. 
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need. 
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1572/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and
+    Selection_5) or (Selection_1 and Selection_2 and Selection_8 and not
+    (Selection_9 and Selection_10))
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.args|all:
+      - client
+  Selection_5:
+    process.args|contains:
+      - R*
+      - '*:*'
+      - '*socks*'
+      - '*.*'
+  Selection_8:
+    event.action|all:
+      - connection_attempted
+  Selection_9:
+    destination.ip|all:
+      - 'null'
+      - 127.0.0.1
+      - '::1'
+      - ''
+  Selection_10:
+    process.name|contains:
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk
+      - java
+      - telnet
+      - ftp
+      - socat
+      - curl
+      - wget
+      - dpkg
+      - docker
+      - dockerd
+      - yum
+      - apt
+      - rpm
+      - dnf
+      - ssh
+      - sshd

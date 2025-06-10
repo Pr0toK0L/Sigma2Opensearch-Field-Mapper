@@ -1,0 +1,99 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Linux Tunneling and_or Port Forwarding
+description: >-
+  This rule monitors for a set of Linux utilities that can be used for tunneling
+  and port forwarding.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1572
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions. 
+  - >-
+    If this activity is related to a system administrator or developer who uses
+    port tunneling/forwarding for benign purposes, consider adding exceptions
+    for specific user accounts or hosts.
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need. 
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1572/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and (Selection_4 or Selection_5
+    or (Selection_6 and not Selection_12) or Selection_7 or Selection_8 or
+    Selection_9 or Selection_10)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+  Selection_4:
+    process.name|contains:
+      - gost
+    process.args|contains:
+      - '-L*'
+      - '-C*'
+      - '-R*'
+  Selection_5:
+    process.name|all:
+      - pivotnacci
+  Selection_6:
+    process.name|contains:
+      - ssh
+      - sshd
+    process.args|contains:
+      - '-R'
+      - '-L'
+      - '-D'
+      - '-w'
+  Selection_12:
+    process.args|contains:
+      - chmod
+  Selection_7:
+    process.name|all:
+      - sshuttle
+    process.args|contains:
+      - '-r'
+      - '--remote'
+      - '-l'
+      - '--listen'
+  Selection_8:
+    process.name|all:
+      - socat
+    process.args|contains:
+      - 'TCP4-LISTEN:*'
+      - SOCKS*
+  Selection_9:
+    process.name|startswith:
+      - chisel
+    process.args|contains:
+      - client
+      - server
+  Selection_10:
+    process.name|contains:
+      - iodine
+      - iodined
+      - dnscat
+      - hans
+      - hans-ubuntu
+      - ptunnel-ng
+      - ssf
+      - 3proxy
+      - ngrok

@@ -1,0 +1,62 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Unix Socket Connection
+description: >-
+  This rule monitors for inter-process communication via Unix sockets.
+  Adversaries may attempt to communicate with local Unix sockets to enumerate
+  application details, find vulnerabilities/configuration mistakes and
+  potentially escalate privileges or set up malicious communication channels via
+  Unix sockets for inter-process communication to attempt to evade detection.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.inter_process_communication
+  - attack.T1559
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection1 or selection2
+  selection1:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.name|contains:
+      - nc
+      - ncat
+      - netcat
+      - nc.openbsd
+    process.args:
+      - '-U'
+    process.args|contains:
+      - /usr/local/
+      - /run/
+      - /var/run/
+  selection2:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.name:
+      - socat
+    process.args:
+      - '-'
+    process.args|contains:
+      - 'UNIX-CLIENT:/usr/local/'
+      - 'UNIX-CLIENT:/run/'
+      - 'UNIX-CLIENT:/var/run/'

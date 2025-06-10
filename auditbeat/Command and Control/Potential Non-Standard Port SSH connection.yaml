@@ -1,0 +1,47 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Non-Standard Port SSH connection
+description: >-
+  Identifies potentially malicious processes communicating via a port paring
+  typically not associated with SSH.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1571
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1571/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2) or (Selection_4 and Selection_5 and not
+    Selection_6 and not Selection_7 and Selection_8)
+  Selection_1:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_2:
+    process.name|all:
+      - ssh
+  Selection_4:
+    process.name|all:
+      - ssh
+  Selection_5:
+    event.action|contains:
+      - connection_attempted
+      - connection_accepted
+      - connected-to
+  Selection_6:
+    destination.port|all:
+      - 22
+  Selection_7:
+    destination.ip|all:
+      - 127.0.0.1
+  Selection_8:
+    network.transport|all:
+      - tcp

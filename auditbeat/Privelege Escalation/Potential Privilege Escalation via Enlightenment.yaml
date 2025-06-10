@@ -1,0 +1,66 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation via Enlightenment
+description: >-
+  Identifies an attempt to exploit a local privilege escalation CVE-2022-37706
+  via a flaw in Linux window manager package Enlightenment. enlightenment_sys in
+  Enlightenment before 0.25.4 allows local users to gain privileges because it
+  is setuid root, and the system library function mishandles pathnames that
+  begin with a /dev/.. substring.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and 
+    Selection_5 and Selection_6 and Selection_7 and Selection_8) or (Selection_9
+    and Selection_10 and Selection_11 and Selection_12)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - enlightenment_sys
+  Selection_5:
+    process.args|contains:
+      - /bin/mount/
+  Selection_6:
+    process.args|all:
+      - '-o'
+  Selection_7:
+    process.args|all:
+      - noexec
+  Selection_8:
+    process.args|contains:
+      - nosuid
+      - nodev
+      - uid=*
+  Selection_9:
+    host.os.type|all:
+      - linux
+  Selection_10:
+    event.action|contains:
+      - uid_change
+      - change
+  Selection_11:
+    event.type|contains:
+      - change
+  Selection_12:
+    user.id|all:
+      - '0'

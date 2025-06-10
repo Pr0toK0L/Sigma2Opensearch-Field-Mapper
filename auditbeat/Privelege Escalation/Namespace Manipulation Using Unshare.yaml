@@ -1,0 +1,51 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Namespace Manipulation Using Unshare
+description: >-
+  Identifies suspicious usage of unshare to manipulate system namespaces.
+  Unshare can be utilized to escalate privileges or escape container security
+  boundaries. Threat actors have utilized this binary to allow themselves to
+  escape to the host and access other resources or escalate privileges.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1543
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1543/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Exclusion_1 and not Exclusion_2 and not Exclusion_3
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  Selection_4:
+    process.executable|all:
+      - /usr/bin/unshare
+  Exclusion_1:
+    process.parent.executable|contains:
+      - /usr/bin/udevadm
+      - /lib/systemd/systemd-udevd
+      - /usr/bin/unshare
+  Exclusion_2:
+    process.args|all:
+      - /usr/bin/snap
+  Exclusion_3:
+    process.parent.name|contains:
+      - zz-proxmox-boot
+      - java

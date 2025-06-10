@@ -1,0 +1,86 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Shell via Wildcard Injection Detected
+description: >-
+  This rule monitors for the execution of a set of linux binaries, that are
+  potentially vulnerable to wildcard injection, with suspicious command line
+  flags followed by a shell spawn event. Linux wildcard injection is a type of
+  security vulnerability where attackers manipulate commands or input containing
+  wildcards to execute unintended operations or access sensitive data by
+  tricking the system into interpreting the wildcard characters in unexpected
+  ways.
+tags:
+  - attack.privilege_escalation
+  - attack.exploitation_for_privilege_escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.TA0002
+  - attack.T1059
+  - attack.t1059.004
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection1 or selection1_1 or selection1_2 or selection1_3 and selection2
+  selection1:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+  selection1_1:
+    process.args|contains:
+      - '--checkpoint=*'
+      - '--checkpoint-action=*'
+    process.name|contains:
+      - tar
+  selection1_2:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name:
+      - rsync
+    process.args|contains:
+      - '-e'
+  selection1_3:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name:
+      - zip
+    process.args:
+      - '--unzip-command'
+  selection2:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.parent.name|contains:
+      - tar
+      - rsync
+      - zip
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish

@@ -1,0 +1,43 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: SSH Key Generated via ssh-keygen
+description: >-
+  This rule identifies the creation of SSH keys using the ssh-keygen tool, which
+  is the standard utility for generating SSH keys. Users often create SSH keys
+  for authentication with remote services. However, threat actors can exploit
+  this tool to move laterally across a network or maintain persistence by
+  generating unauthorized SSH keys, granting them SSH access to systems.
+tags:
+  - attack.lateral_movement
+  - attack.persistence
+  - attack.TA0003
+  - attack.TA0008
+  - attack.t1098
+  - attack.t1021
+  - attack.t1563
+  - attack.t1098.004
+  - attack.t1021.004
+  - attack.t1563.001
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter1
+  selection:
+    host.os.type|all:
+      - linux
+    event.action|contains:
+      - creation
+      - file_create_event
+    process.executable|all:
+      - /usr/bin/ssh-keygen
+    file.path|contains:
+      - /home/*/.ssh/*
+      - /root/.ssh/*
+      - /etc/ssh/*
+  filter1:
+    file.name|contains:
+      - known_hosts.*

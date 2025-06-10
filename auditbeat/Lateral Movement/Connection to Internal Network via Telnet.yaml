@@ -1,0 +1,60 @@
+id: ""
+logsource:
+  product: linux
+title: Connection to Internal Network via Telnet
+description: >-
+  Telnet provides a command line interface for communication with a remote
+  device or server.
+tags:
+  - attack.Lateral_Movement
+  - attack.TA0008
+  - attack.T1021
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0008/'
+  - 'https://attack.mitre.org/techniques/T1021/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 or (Selection_2 and Selection_3)
+  Selection_1:
+    host.os.type|all:
+      - linux
+    process.name|all:
+      - telnet
+    event.type|all:
+      - start
+  Selection_2:
+    host.os.type|all:
+      - linux
+    process.name|all:
+      - telnet
+  Selection_3:
+    destination.ip|contains:
+      - 10.0.0.0/8
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.0.0/29
+      - 192.0.0.8/32
+      - 192.0.0.9/32
+      - 192.0.0.10/32
+      - 192.0.0.170/32
+      - 192.0.0.171/32
+      - 192.0.2.0/24
+      - 192.31.196.0/24
+      - 192.52.193.0/24
+      - 192.168.0.0/16
+      - 192.88.99.0/24
+      - 224.0.0.0/4
+      - 100.64.0.0/10
+      - 192.175.48.0/24
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 240.0.0.0/4
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'  

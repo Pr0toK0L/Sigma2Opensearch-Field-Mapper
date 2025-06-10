@@ -1,0 +1,34 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation Sudoers File Mod
+description: >-
+  A sudoers file specifies the commands users or groups can run and from which
+  terminals. Adversaries can take advantage of these configurations to execute
+  commands as other users or spawn processes with higher privileges.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1548
+  - attack.T1548.003
+  - attack.auditbeat
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/003/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3
+  Selection_1:
+    event.category|all:
+      - process
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    process.args|contains:
+      - echo
+      - 'NOPASSWD:ALL'

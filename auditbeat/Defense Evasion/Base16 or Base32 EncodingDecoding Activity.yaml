@@ -1,0 +1,42 @@
+id: ''
+logsource:
+  product: linux
+title: Base16 or Base32 EncodingDecoding Activity
+description: >-
+  Adversaries may encode/decode data in an attempt to evade detection by host-
+  or network-based security controls.
+tags:
+  - attack.defense_evasion
+  - attack.t1027
+  - attack.t1140
+  - attack.TA0005
+falsepositives:
+  - >-
+    Automated tools such as Jenkins may encode or decode files as part of their
+    normal behavior. These events can be filtered by the process executable or
+    username values.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.name|contains:
+      - base16
+      - base32
+      - base32plain
+      - base32hex
+  Selection_2:
+    process.args|contains:
+      - '--help'
+      - '--version'

@@ -1,0 +1,51 @@
+id: ''
+logsource:
+  product: linux
+title: Elastic Agent Service Terminated
+description: >-
+  Identifies the Elastic endpoint agent has stopped and is no longer running on
+  the host. Adversaries may attempt to disable security monitoring tools in an
+  attempt to evade detection or prevention capabilities during an intrusion.
+  This may also indicate an issue with the agent itself and should be addressed
+  to ensure defensive measures are back in a stable state.
+tags:
+  - attack.defense_evasion
+  - attack.t1562
+  - attack.TA0005
+falsepositives:
+  - Legitimate administrative actions to stop or restart the Elastic Agent
+level: medium
+status: experimental
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    event.type|contains:
+      - start
+      - end
+    process.name|contains:
+      - net.exe
+      - sc.exe
+      - wmic.exe
+      - powershell.exe
+      - taskkill.exe
+      - PsKill.exe
+      - ProcessHacker.exe
+      - systemctl
+      - service
+      - pkill
+      - killall
+      - kextunload
+    process.args|contains:
+      - stopservice
+      - uninstall
+      - stop
+      - disabled
+      - Stop-Process
+      - terminate
+      - suspend
+      - elasticendpoint
+      - Elastic Agent
+      - elastic-agent
+      - elastic-endpoint
+      - com.apple.iokit.EndpointSecurity

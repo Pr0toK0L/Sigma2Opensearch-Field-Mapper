@@ -1,0 +1,54 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Data Encryption via OpenSSL Utility
+description: >-
+  Identifies when theIdentifies when the openssl command-line utility is used to
+  encrypt multiple files on a host within a short time window.
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1486
+falsepositives: []
+level: medium
+status: stable
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1486/'
+author: Elastic
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and Selection_6 and not Selection_7
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_3:
+    process.name|contains:
+      - openssl
+  Selection_4:
+    process.args|all:
+      - '-in'
+  Selection_5:
+    process.args|all:
+      - '-out'
+  Selection_6:
+    process.args|contains:
+      - '-k'
+      - '-K'
+      - '-kfile'
+      - '-pass'
+      - '-iv'
+      - '-md'
+  Selection_7:
+    process.args|contains:
+      - '-d'
+      - '-a'
+      - '-A'
+      - '-base64'
+      - '-none'
+      - '-nosalt'

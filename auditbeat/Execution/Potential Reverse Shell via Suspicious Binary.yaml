@@ -1,0 +1,103 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Reverse Shell via Suspicious Binary
+description: >-
+  This detection rule detects the creation of a shell through a chain consisting
+  of the execution of a suspicious binary (located in a commonly abused location
+  or executed manually) followed by a network event and ending with a shell
+  being spawned. Stageless reverse TCP shells display this behaviour. Attackers
+  may spawn reverse shells to establish persistence onto a target system.
+tags:
+  - attack.execution
+  - attack.command_and_control
+  - attack.TA0002
+  - attack.T1059
+  - attack.TA0011
+  - attack.T1071
+  - attack.t1059.004
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: (selection1 and not filter1) or (selection2 and not filter2)
+  selection1:
+    host.os.type:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.executable|contains:
+      - ./
+      - /tmp/
+      - /var/tmp/
+      - /var/www/
+      - /dev/shm/
+      - /etc/init.d/
+      - /etc/rc*.d/
+      - /etc/crontab
+      - /etc/cron.
+      - /etc/update-motd.d/
+      - /usr/lib/update-notifier/
+      - /boot/
+      - /srv/
+      - /run/
+      - /root/
+      - /etc/rc.local
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  filter1:
+    process.name|contains:
+      - curl
+      - wget
+      - ping
+      - apt
+      - dpkg
+      - yum
+      - rpm
+      - dnf
+      - dockerd
+  selection2:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - connection_attempted
+      - connection_accepted
+      - connected-to
+    process.executable|contains:
+      - ./
+      - /tmp/
+      - /var/tmp/
+      - /var/www/
+      - /dev/shm/
+      - /etc/init.d/
+      - /etc/rc*.d/
+      - /etc/crontab
+      - /etc/cron.
+      - /etc/update-motd.d/
+      - /usr/lib/update-notifier/
+      - /boot/
+      - /srv/
+      - /run/
+      - /root/
+      - /etc/rc.local
+    destination.ip:
+      - '*'
+  filter2:
+    destination.ip|contains:
+      - 127.0.0.1
+      - '::1'
+

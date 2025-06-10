@@ -1,0 +1,127 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Symbolic Link Created
+description: >-
+  Identifies the creation of a symbolic link to a suspicious file or location. A
+  symbolic link is a reference to a file or directory that acts as a pointer or
+  shortcut, allowing users to access the target file or directory from a
+  different location in the file system.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1548
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.T1003
+  - attack.T1003.008
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1003/'
+  - 'https://attack.mitre.org/techniques/T1003/008/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and (Selection_6 or (Selection_7 and Selection_14) or Selection_8 or
+    (Selection_9 and Selection_15) or Selection_10 or (Selection_11 and
+    Selection_16))
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  Selection_4:
+    process.name|all:
+      - ln
+  Selection_5:
+    process.args|contains:
+      - '-s'
+      - '-sf'
+  Selection_6:
+    process.args|contains:
+      - /etc/shadow
+      - /etc/shadow-
+      - /etc/shadow~
+      - /etc/gshadow
+      - /etc/gshadow-
+  Selection_7:
+    process.working_directory|all:
+      - /etc
+  Selection_14:
+    process.args|contains:
+      - shadow
+      - shadow-
+      - shadow~
+      - gshadow
+      - gshadow-
+  Selection_8:
+    process.args|contains:
+      - /bin/bash
+      - /bin/dash
+      - /bin/sh
+      - /bin/tcsh
+      - /bin/csh
+      - /bin/zsh
+      - /bin/ksh
+      - /bin/fish
+  Selection_9:
+    process.working_directory|all:
+      - /bin
+  Selection_15:
+    process.args|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  Selection_10:
+    process.args|contains:
+      - /usr/bin/bash
+      - /usr/bin/dash
+      - /usr/bin/sh
+      - /usr/bin/tcsh
+      - /usr/bin/csh
+      - /usr/bin/zsh
+      - /usr/bin/ksh
+      - /usr/bin/fish
+  Selection_11:
+    process.working_directory|all:
+      - /usr/bin
+  Selection_16:
+    process.args|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  Selection_12:
+    process.args|contains:
+      - /etc/cron.d/
+      - /etc/cron.daily/
+      - /etc/cron.hourly/
+      - /etc/cron.weekly/
+      - /etc/cron.monthly/
+  Selection_13:
+    process.args|contains:
+      - /home/*/.ssh/
+      - /root/.ssh/
+      - /etc/sudoers.d/
+      - /dev/shm/

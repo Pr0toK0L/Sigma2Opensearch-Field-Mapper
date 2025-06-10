@@ -1,0 +1,41 @@
+id: ""
+logsource:
+  product: linux
+title: Virtual Machine Fingerprinting via Grep
+description: >-
+  An adversary may attempt to get detailed information about the operating
+  system and hardware.
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1082
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1082/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and not Selection_3 and Selection_4 and
+    Selection_5
+  Selection_1:
+    event.type|contains:
+      - start
+  Selection_2:
+    process.name|contains:
+      - grep
+      - egrep
+  Selection_3:
+    user.id|all:
+      - '0'
+  Selection_4:
+    process.args|contains:
+      - parallels*
+      - vmware*
+      - virtualbox*
+  Selection_5:
+    process.args|contains:
+      - Manufacturer*

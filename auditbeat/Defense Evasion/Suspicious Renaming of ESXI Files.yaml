@@ -1,0 +1,33 @@
+id: ''
+logsource:
+  product: linux
+title: Suspicious Renaming of ESXi Files
+description: >-
+  Identifies instances where VMware-related files with extensions are renamed on
+  a Linux system. This rule monitors for the rename event action associated with
+  these file types, which could indicate malicious activity.
+tags:
+  - attack.defense_evasion
+  - attack.T1036
+  - attack.TA0005
+falsepositives:
+  - Legitimate file operations during system maintenance or upgrades.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type:
+      - linux
+    process.args|endswith:
+      - '*.vmdk'
+      - '*.vmx'
+      - '*.vmxf'
+      - '*.vmsd'
+      - '*.vmsn'
+      - '*.vswp'
+      - '*.vmss'
+      - '*.nvram'
+      - '*.vmem'

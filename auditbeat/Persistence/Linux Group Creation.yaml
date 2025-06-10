@@ -1,0 +1,29 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Linux Group Creation
+description: >-
+  Identifies attempts to create a new group. Attackers may create new groups to establish persistence on a system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1136
+  - attack.t1136.001
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - group
+      - creation
+      - create
+    process.name|contains:
+      - groupadd
+      - addgroup
+falsepositives:
+  - Legitimate use of groupadd or addgroup to create new groups by system administrators or automated tools

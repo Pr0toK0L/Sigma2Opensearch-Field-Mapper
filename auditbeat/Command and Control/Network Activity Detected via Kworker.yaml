@@ -1,0 +1,61 @@
+id: ""
+logsource:
+  product: linux
+title: Network Activity Detected via Kworker
+description: This rule monitors for network connections from a kworker process.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.Defense_Evasion
+  - attack.TA0005
+  - attack.Rootkit
+  - attack.T1014
+  - attack.Masquerading
+  - attack.T1036
+  - attack.Exfiltration
+  - attack.TA0010
+  - attack.T1041
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/tactics/TA0005/'
+  - 'https://attack.mitre.org/techniques/T1014/'
+  - 'https://attack.mitre.org/techniques/T1036/'
+  - 'https://attack.mitre.org/tactics/TA0010/'
+  - 'https://attack.mitre.org/techniques/T1041/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5 and not Selection_6
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.category|all:
+      - network
+  Selection_3:
+    event.action|contains:
+      - connection_attempted
+      - connection_accepted
+      - connected-to
+  Selection_4:
+    process.name|startswith:
+      - kworker
+  Selection_5:
+    destination.ip|contains:
+      - 10.0.0.0/8
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 224.0.0.0/4
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'
+  Selection_6:
+    destination.port|contains:
+      - 2049

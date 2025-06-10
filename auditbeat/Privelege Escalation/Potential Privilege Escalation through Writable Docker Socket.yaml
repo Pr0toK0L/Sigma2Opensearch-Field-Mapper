@@ -1,0 +1,56 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation Docker Socket
+description: >-
+  This rule monitors for the usage of Docker runtime sockets to escalate
+  privileges on Linux systems. Docker sockets by default are only be writable by
+  the root user and docker group. Attackers that have permissions to write to
+  these sockets may be able to create and run a container that allows them to
+  escalate privileges and gain further access onto the host file system.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1611
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1611/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and ((Selection_4 and
+    Selection_5 and Selection_6 and Selection_7) or (Selection_8 and
+    Selection_9))
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - docker
+  Selection_5:
+    process.args|contains:
+      - run
+  Selection_6:
+    process.args|contains:
+      - '-it'
+  Selection_7:
+    process.args|contains:
+      - 'unix://*/docker.sock'
+      - 'unix://*/dockershim.sock'
+  Selection_8:
+    process.name|all:
+      - socat
+  Selection_9:
+    process.args|contains:
+      - 'UNIX-CONNECT:*/docker.sock'
+      - 'UNIX-CONNECT:*/dockershim.sock'

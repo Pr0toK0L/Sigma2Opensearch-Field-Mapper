@@ -1,0 +1,73 @@
+id: ""
+logsource:
+  product: linux
+title: Security Software Discovery via Grep
+description: >-
+  Identifies the use of the grep command to discover known third-party macOS and
+  Linux security tools, such as Antivirus or Host Firewall details. 
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1518
+  - attack.T1518.001
+  - attack.auditbeat
+falsepositives:
+  - >-
+    Discovery activities are not inherently malicious if they occur in
+    isolation. As long as the analyst did not identify suspicious activity
+    related to the user or host, such alerts can be dismissed. 
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1518/'
+  - 'https://attack.mitre.org/techniques/T1518/001/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and not Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    event.type|contains:
+      - start
+  Selection_2:
+    process.name|contains:
+      - grep
+  Selection_3:
+    user.id|all:
+      - '0'
+  Selection_4:
+    process.args|contains:
+      - Little Snitch*
+      - Avast*
+      - Avira*
+      - ESET*
+      - BlockBlock*
+      - 360Sec*
+      - LuLu*
+      - KnockKnock*
+      - kav
+      - KIS
+      - RTProtectionDaemon*
+      - Malware*
+      - VShieldScanner*
+      - WebProtection*
+      - webinspectord*
+      - McAfee*
+      - isecespd*
+      - macmnsvc*
+      - masvc*
+      - kesl*
+      - avscan*
+      - guard*
+      - rtvscand*
+      - symcfgd*
+      - scmdaemon*
+      - symantec*
+      - sophos*
+      - osquery*
+      - elastic-endpoint*
+  Selection_5:
+    process.args|contains:
+      - Avast
+      - Passwords

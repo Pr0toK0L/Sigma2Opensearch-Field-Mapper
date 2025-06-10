@@ -1,0 +1,36 @@
+id: ''
+logsource:
+  product: linux
+title: File Deletion via Shred
+description: >-
+  Malware or other files dropped or created on a system by an adversary may
+  leave traces behind as to what was done within a network and how. Adversaries
+  may remove these files over the course of an intrusion to keep their footprint
+  low or remove them at the end as part of the post-intrusion cleanup process.
+tags:
+  - attack.defense_evasion
+  - attack.t1070
+  - attack.TA0005
+falsepositives:
+  - Legitimate administrative actions to securely delete files
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    process.name:
+      - shred
+    process.args|contains:
+      - '-u'
+      - '--remove'
+      - '-z'
+      - '--zero'
+  Selection_2:
+    process.name|all:
+      - logrotate

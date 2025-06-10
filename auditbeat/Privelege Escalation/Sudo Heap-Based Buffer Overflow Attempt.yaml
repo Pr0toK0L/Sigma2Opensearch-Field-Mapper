@@ -1,0 +1,41 @@
+id: ""
+logsource:
+  product: linux
+title: Sudo Heap-Based Buffer Overflow Attempt
+description: >-
+  Identifies the attempted use of a heap-based buffer overflow vulnerability for
+  the Sudo binary in Unix-like systems (CVE-2021-3156). Successful exploitation
+  allows an unprivileged user to escalate to the root user.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.auditbeat
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and (Selection_4 and
+    Selection_5)
+  Selection_1:
+    event.category|all:
+      - process
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    process.name|contains:
+      - sudo
+      - sudoedit
+  Selection_4:
+    process.args|endswith:
+      - \\
+  Selection_5:
+    process.args|contains:
+      - '-i'
+      - '-s'

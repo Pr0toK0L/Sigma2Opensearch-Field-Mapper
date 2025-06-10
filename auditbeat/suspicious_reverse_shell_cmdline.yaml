@@ -1,0 +1,36 @@
+title: Suspicious Reverse Shell Command Line
+id: 83dcd9f6-9ca8-4af7-a16e-a1c7a6b51871
+status: exprimental
+description: Detects suspicious shell commands or program code that may be executed or used in command line to establish a reverse shell.
+references:
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/d9921e370b7c668ee8cc42d09b1932c1b98fa9dc/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md
+author: hoang.nguyen
+tags:
+    - attack.execution
+    - attack.t1059
+logsource:
+    product: linux
+detection:
+    selection1:
+        process.args|contains:
+            - 'bash -i >& /dev/tcp/'
+            - 'bash -i >& /dev/udp/'
+            - 'sh -i >$ /dev/tcp/'
+            - 'sh -i >$ /dev/udp/'
+            - ' | /bin/bash | telnet'
+            - ' | /bin/bash | nc'
+            - ' | /bin/bash | ncat'
+            - ' | /bin/sh | telnet'
+            - 'nc'
+            - 'nc -c'
+            - 'nc -e '
+            - 'ncat -e '
+            - 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc '
+            - 'python -c '
+            - 'perl -e '
+            - 'php -r '
+            - 'ruby -rsocket -e'
+    condition: selection1
+falsepositives:
+    - Legitimate administrative scripts or commands
+level: high

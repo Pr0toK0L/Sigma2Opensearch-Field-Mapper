@@ -1,0 +1,27 @@
+id: ""
+logsource:
+  product: linux
+title: WebServer Access Logs Deleted
+description: >-
+  Identifies the deletion of WebServer access logs. This may indicate an attempt
+  to evade detection or destroy forensic evidence on a system.
+tags:
+  - attack.defense_evasion
+  - attack.t1070
+  - attack.TA0005
+falsepositives:
+  - Legitimate log file rotation or maintenance activities
+level: medium
+status: experimental
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    event.type|contains:
+      - deletion
+      - delete
+    file.path|contains:
+      - /var/log/apache*/access.log
+      - /etc/httpd/logs/access_log
+      - /var/log/httpd/access_log
+      - /var/www/*/logs/access.log

@@ -1,0 +1,46 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Kernel Load or Unload via Kexec Detected
+description: >-
+  This detection rule identifies the usage of kexec, helping to uncover
+  unauthorized kernel replacements and potential compromise of the systems
+  integrity. Kexec is a Linux feature that enables the loading and execution of
+  a different kernel without going through the typical boot process. Malicious
+  actors can abuse kexec to bypass security measures, escalate privileges,
+  establish persistence or hide their activities by loading a malicious kernel,
+  enabling them to tamper with the systems trusted state, allowing like a VM
+  Escape.
+tags:
+  - attack.defense_evasion
+  - attack.privilege_escalation
+  - attack.persistence
+  - attack.t1547
+  - attack.t1601
+  - attack.t1547.006
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.name|all:
+      - kexec
+    process.args|contains:
+      - '--exec'
+      - '-e'
+      - '--load'
+      - '-l'
+      - '--unload'
+      - '-u'

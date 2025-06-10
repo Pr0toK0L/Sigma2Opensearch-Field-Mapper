@@ -1,0 +1,51 @@
+id: 25d917c4-aa3c-4111-974c-286c0312ff95
+logsource:
+  product: linux
+title: Network Activity Detected via Kworker
+description: >-
+  This rule monitors for network connections from a kworker process, kworker, or
+  kernel worker, processes are part of the kernels workqueue mechanism. They are
+  responsible for executing work that has been scheduled to be done in kernel
+  space, which might include tasks like handling interrupts, background
+  activities, and other kernel related tasks. Attackers may attempt to evade
+  detection by masquerading as a kernel worker process
+tags:
+  - attack.execution
+  - attack.t1014
+  - attack.t1036
+  - attack.t1041
+falsepositives:
+  - New benign software installation activity
+  - System administrator or developer using kworker process for benign purposes
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1014/'
+  - 'https://attack.mitre.org/techniques/T1036/'
+  - 'https://attack.mitre.org/techniques/T1041/'
+author: hoang.nguyen
+detection:
+  condition: selection and not not selection1
+  selection:
+    host.os.type:
+      - linux
+    event.category:
+      - network
+    event.action|contains:
+      - connection_attempted
+      - connection_accepted
+    process.name:
+      - kworker*
+  selection1:
+    destination.ip:
+      - '10.0.0.0/8'
+      - '127.0.0.0/8'
+      - '169.254.0.0/16'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+      - '224.0.0.0/4'
+      - '"::1"'
+      - '"FE80::/10"'
+      - '"FF00::/8"'
+    destination.port:
+      - '2049'

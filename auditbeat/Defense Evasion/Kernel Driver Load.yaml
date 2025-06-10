@@ -1,0 +1,24 @@
+id: ''
+logsource:
+  product: linux
+title: Kernel Driver Load
+description: >-
+  Detects the loading of a Linux kernel module through system calls, which could
+  indicate the presence of rootkit activity.
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.t1547
+  - attack.t1014
+falsepositives:
+  - Legitimate kernel module management operations by system administrators.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    auditd.data.syscall|contains:
+      - init_module
+      - finit_module

@@ -1,0 +1,32 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Container Escape Mod notify_release File
+description: >-
+  This rule detects modification of the cgroup notify_on_release file from
+  inside a container.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1611
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1611/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+  Selection_2:
+    event.action|contains:
+      - open
+      - opened-file
+      - opened
+  Selection_3:
+    event.type|contains:
+      - change
+  Selection_4:
+    file.name|contains:
+      - notify_on_release

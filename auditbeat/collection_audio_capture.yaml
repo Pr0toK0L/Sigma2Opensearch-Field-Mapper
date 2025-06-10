@@ -1,0 +1,22 @@
+id: _aw9q48BFk0Arr8s44F0
+logsource:
+  product: linux
+title: Audio Capture
+description: Detects attempts to record audio with arecord utility
+tags:
+  - attack.collection
+  - attack.t1123
+level: low
+status: experimental
+references:
+  - 'https://linux.die.net/man/1/arecord'
+  - >-
+    https://linuxconfig.org/how-to-test-microphone-with-audio-linux-sound-architecture-alsa
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    process.args|contains:
+      - arecord
+      - '-vv'
+      - '-fdat'

@@ -1,0 +1,39 @@
+id: ""
+logsource:
+  product: linux
+title: Trap Signals Execution
+description: >-
+  Identify activity related where adversaries can include a trap command which
+  then allows programs and shells to specify commands that will be executed upon
+  receiving interrupt signals.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1546
+  - attack.T1546.005
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1546/'
+  - 'https://attack.mitre.org/techniques/T1546/005/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+    event.type|all:
+      - start
+  Selection_2:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+  Selection_3:
+    process.name|all:
+      - trap
+  Selection_4:
+    process.args|startswith:
+      - SIG

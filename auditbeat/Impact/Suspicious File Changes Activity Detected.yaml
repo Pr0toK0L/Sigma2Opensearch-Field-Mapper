@@ -1,0 +1,75 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious File Changes Activity Detected
+description: >-
+  This rule identifies a sequence of 100 file extension rename events within a
+  set of common file paths by the same process in a timespan of 1 second.
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1486
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1486/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|contains:
+      - change
+      - file
+  Selection_3:
+    event.action|all:
+      - rename
+      - creation
+      - change
+  Selection_4:
+    process.executable|contains:
+      - ./*
+      - /tmp/*
+      - /var/tmp/*
+      - /dev/shm/*
+      - /var/run/*
+      - /boot/*
+      - /srv/*
+      - /run/*
+  Selection_5:
+    process.name|contains:
+      - dpkg
+      - yum
+      - dnf
+      - rpm
+      - dockerd
+      - go
+      - java
+      - pip*
+      - python*
+      - node
+      - containerd
+      - php
+      - p4d
+      - conda
+      - chrome
+      - imap
+      - cmake
+      - firefox
+      - semanage
+      - semodule
+      - ansible-galaxy
+      - fc-cache
+      - jammy
+      - git
+      - systemsettings
+      - vmis-launcher
+      - bundle
+      - kudu-tserver
+      - suldownloader

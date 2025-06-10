@@ -1,0 +1,69 @@
+id: ""
+logsource:
+  product: linux
+title: SUID_SGUID Enumeration Detected
+description: >-
+  This rule monitors for the usage of the find command in conjunction with SUID
+  and SGUID permission arguments.
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1083
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1548
+  - attack.T1548.001
+  - attack.Persistence
+  - attack.TA0003
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1083/'
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/001/'
+  - 'https://attack.mitre.org/tactics/TA0003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and Selection_6 and not Selection_7 and not Selection_8
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|contains:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|contains:
+      - find
+  Selection_5:
+    process.args|contains:
+      - '-perm'
+  Selection_6:
+    process.args|contains:
+      - /6000
+      - '-6000'
+      - /4000
+      - '-4000'
+      - /2000
+      - '-2000'
+      - /u=s
+      - '-u=s'
+      - /g=s
+      - '-g=s'
+      - '/u=s,g=s'
+      - '/g=s,u=s'
+  Selection_7:
+    process.args|all:
+      - /usr/bin/pkexec
+  Selection_8:
+    process.args|all:
+      - '-xdev'

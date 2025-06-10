@@ -1,0 +1,44 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: SSH Process Launched From Inside A Container
+description: >-
+  This rule detects an SSH or SSHD process executed from inside a container.
+  This includes both the client ssh binary and server ssh daemon process. SSH
+  usage inside a container should be avoided and monitored closely when
+  necessary. With valid credentials an attacker may move laterally to other
+  containers or to the underlying host through container breakout. They may also
+  use valid SSH credentials as a persistence mechanism.
+tags:
+  - attack.lateral_movement
+  - attack.persistence
+  - attack.TA0008
+  - attack.TA0003
+  - attack.t1021
+  - attack.t1133
+  - attack.t1021.004
+falsepositives:
+  - >-
+    SSH usage may be legitimate depending on the environment. Access patterns
+    and follow-on activity should be analyzed to distinguish between authorized
+    and potentially malicious behavior
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter
+  selection:
+    event.type|all:
+      - start
+    event.action|contains:
+      - fork
+      - exec
+      - execute
+    process.name|all:
+      - sshd
+      - ssh
+      - autossh
+  filter:
+    event.action|all:
+      - end

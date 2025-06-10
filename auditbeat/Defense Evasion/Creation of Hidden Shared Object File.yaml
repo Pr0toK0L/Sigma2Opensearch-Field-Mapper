@@ -1,0 +1,36 @@
+id: ''
+logsource:
+  product: linux
+title: Creation of Hidden Shared Object File
+description: >-
+  Identifies the creation of a hidden shared object so file. Users can mark
+  specific files as hidden simply by putting a dot as the first character in the
+  file or folder name. Adversaries can use this to their advantage to hide files
+  and folders on the system for persistence and defense evasion.
+tags:
+  - attack.defense_evasion
+  - attack.t1564
+  - attack.TA0005
+falsepositives:
+  - >-
+    Certain applications and processes may legitimately create hidden .so files
+    as part of their normal behavior.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type|contains:
+      - creation
+      - create
+    file.extension:
+      - so
+    file.name|contains:
+      - .*.so
+  Selection_2:
+    process.name|all:
+      - dockerd

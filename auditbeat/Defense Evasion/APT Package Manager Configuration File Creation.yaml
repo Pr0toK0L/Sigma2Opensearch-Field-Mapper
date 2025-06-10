@@ -1,0 +1,119 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: APT Package Manager Configuration File Creation
+description: >-
+  Detects file creation events in the configuration directory for the APT
+  package manager. In Linux, APT (Advanced Package Tool) is a command-line
+  utility used for handling packages on (by default) Debian-based systems,
+  providing functions for installing, updating, upgrading, and removing software
+  along with managing package repositories. Attackers can backdoor APT to gain
+  persistence by injecting malicious code into scripts that APT runs, thereby
+  ensuring continued unauthorized access or control each time APT is used for
+  package management.
+tags:
+  - attack.persistence
+  - attack.t1543
+  - attack.t1574
+  - attack.defense_evasion
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection and not (filter1 or filter2 or filter3 or filter4 or filter5 or
+    filter6 or filter7 or filter8)
+  selection:
+    host.os.type:
+      - linux
+    event.action|contains:
+      - rename
+      - creation
+      - create
+    file.path:
+      - /etc/apt/apt.conf.d/*
+  filter1:
+    process.executable|contains:
+      - /bin/dpkg
+      - /usr/bin/dpkg
+      - /bin/dockerd
+      - /usr/bin/dockerd
+      - /usr/sbin/dockerd
+      - /bin/microdnf
+      - /usr/bin/microdnf
+      - /bin/rpm
+      - /usr/bin/rpm
+      - /bin/snapd
+      - /usr/bin/snapd
+      - /bin/yum
+      - /usr/bin/yum
+      - /bin/dnf
+      - /usr/bin/dnf
+      - /bin/podman
+      - /usr/bin/podman
+      - /bin/dnf-automatic
+      - /usr/bin/dnf-automatic
+      - /bin/pacman
+      - /usr/bin/pacman
+      - /usr/bin/dpkg-divert
+      - /bin/dpkg-divert
+      - /sbin/apk
+      - /usr/sbin/apk
+      - /usr/local/sbin/apk
+      - /usr/bin/apt
+      - /usr/sbin/pacman
+      - /usr/bin/puppet
+      - /bin/puppet
+      - /opt/puppetlabs/puppet/bin/puppet
+      - /usr/bin/chef-client
+      - /bin/chef-client
+      - /bin/autossl_check
+      - /usr/bin/autossl_check
+      - /proc/self/exe
+      - /dev/fd/*
+      - /usr/bin/pamac-daemon
+      - /bin/pamac-daemon
+      - /usr/lib/snapd/snapd
+      - /usr/local/bin/dockerd
+      - /usr/libexec/netplan/generate
+      - /usr/local/bin/apt-get
+      - /usr/bin/apt-get
+  filter2:
+    file.path:
+      - /etc/apt/apt.conf.d/*.tmp*
+  filter3:
+    file.extension|contains:
+      - swp
+      - swpx
+      - swx
+      - dpkg-remove
+  filter4:
+    file.extension:
+      - dpkg-new
+  filter5:
+    process.executable|contains:
+      - /nix/store/*
+      - /var/lib/dpkg/*
+      - /tmp/vmis.*
+      - /snap/*
+      - /dev/fd/*
+      - /usr/lib/*
+      - /usr/libexec/*
+      - /etc/kernel/*
+  filter6:
+    process.executable:
+      - 'null'
+  filter7:
+    process.name:
+      - sed
+    file.name:
+      - sed*
+  filter8:
+    process.name:
+      - perl
+    file.name:
+      - e2scrub_all.tmp*

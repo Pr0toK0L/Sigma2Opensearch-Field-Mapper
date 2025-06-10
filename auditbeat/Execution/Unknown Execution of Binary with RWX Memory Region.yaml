@@ -1,0 +1,25 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+  service: auditbeat
+title: Unknown Execution of Binary with RWX Memory Region
+description: >-
+  Monitors for the execution of a previously unknown unix binary with read, write, and execute memory region permissions. The mprotect() system call is used to change the access protections on a region of memory that has already been allocated. This syscall allows a process to modify the permissions of pages in its virtual address space, enabling or disabling permissions such as read, write, and execute for those pages. RWX permissions on memory are in many cases overly permissive and should be analyzed thoroughly.
+tags:
+  - attack.t1059.004
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    event.category: process
+    host.os.type: linux
+    auditd.data.syscall: mprotect
+    auditd.data.a2|contains: "7"

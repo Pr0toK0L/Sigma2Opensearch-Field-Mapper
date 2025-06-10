@@ -1,0 +1,93 @@
+id: 1d2e6b03-987a-4b9a-a4a1-f6edb5c2e4bc
+logsource:
+  product: linux
+title: Potential OpenSSH Backdoor Logging Activity
+description: >
+  Identifies a Secure Shell (SSH) client or server process creating or writing
+  to a known SSH backdoor log file. Adversaries may modify SSH related binaries
+  for persistence or credential access via patching sensitive functions to
+  enable unauthorized access or to log SSH credentials for exfiltration.
+tags:
+  - attack.persistence
+  - attack.credential_access
+  - attack.t1556
+  - attack.t1554
+  - attack.TA0003
+  - attack.TA0006
+  - attack.auditbeat
+falsepositives:
+  - Updates to approved and trusted SSH executables can trigger this rule.
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1556/'
+  - 'https://attack.mitre.org/techniques/T1554/'
+author: hoang.nguyen
+detection:
+  condition: selection and ((filter1 and not filter4) or filter2 or filter3)
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - change
+      - create
+    process.executable|contains:
+      - /usr/sbin/sshd
+      - /usr/bin/ssh
+  filter1:
+    file.name|contains:
+      - .*
+      - ~*
+      - '*~'
+  filter2:
+    file.extension|contains:
+      - in
+      - out
+      - ini
+      - h
+      - gz
+      - so
+      - sock
+      - sync
+      - '0'
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      - '5'
+      - '6'
+      - '7'
+      - '8'
+      - '9'
+  filter3:
+    file.path|contains:
+      - /private/etc/*--
+      - /usr/share/*
+      - /usr/include/*
+      - /usr/local/include/*
+      - /private/tmp/*
+      - /private/var/tmp/*
+      - /usr/tmp/*
+      - /usr/share/man/*
+      - /usr/local/share/*
+      - /usr/lib/*.so.*
+      - /private/etc/ssh/.sshd_auth
+      - /usr/bin/ssd
+      - /private/var/opt/power
+      - /private/etc/ssh/ssh_known_hosts
+      - /private/var/html/lol
+      - /private/var/log/utmp
+      - /private/var/lib
+      - /var/run/sshd/sshd.pid
+      - /var/run/nscd/ns.pid
+      - /var/run/udev/ud.pid
+      - /var/run/udevd.pid
+  filter4:
+    file.name|contains:
+      - .cache
+      - .viminfo
+      - .bash_history
+      - .google_authenticator
+      - .jelenv
+      - .csvignore
+      - .rtreport

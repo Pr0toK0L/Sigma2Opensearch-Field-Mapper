@@ -1,0 +1,136 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Creation Modification of Pluggable Authentication
+description: >-
+  This rule monitors for the creation or modification of Pluggable
+  Authentication Module (PAM) shared object files or  configuration files.
+  Attackers may create or modify these files to maintain persistence on a
+  compromised system, or  harvest account credentials.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.credential_access
+  - attack.TA0006
+  - attack.t1543
+  - attack.t1556
+falsepositives:
+  - >-
+    Trusted system module updates or allowed Pluggable Authentication Module
+    (PAM) daemon configuration changes.
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+  - 'https://attack.mitre.org/techniques/T1556/'
+author: elastic
+detection:
+  condition: >-
+    selection and (filter1 or filter2 or filter3) and not (exclusion1 or
+    exclusion2 or exclusion3 or exclusion4 or exclusion5 or exclusion6 or
+    exclusion7)
+  selection:
+    host.os.type:
+      - linux
+    event.action|contains:
+      - rename
+      - creation
+      - create
+  filter1:
+    file.path|contains:
+      - /lib/security/*
+      - /lib64/security/*
+      - /usr/lib/security/*
+      - /usr/lib64/security/*
+      - /usr/lib/x86_64-linux-gnu/security/*
+    file.extension:
+      - so
+  filter2:
+    file.path|contains:
+      - /etc/pam.d/*
+    file.extension:
+      - 'null'
+  filter3:
+    file.path|contains:
+      - /etc/security/pam_*
+      - /etc/pam.conf
+  exclusion1:
+    process.executable|contains:
+      - /bin/dpkg
+      - /usr/bin/dpkg
+      - /bin/dockerd
+      - /usr/bin/dockerd
+      - /usr/sbin/dockerd
+      - /bin/microdnf
+      - /usr/bin/microdnf
+      - /bin/rpm
+      - /usr/bin/rpm
+      - /bin/snapd
+      - /usr/bin/snapd
+      - /bin/yum
+      - /usr/bin/yum
+      - /bin/dnf
+      - /usr/bin/dnf
+      - /bin/podman
+      - /usr/bin/podman
+      - /bin/dnf-automatic
+      - /usr/bin/dnf-automatic
+      - /bin/pacman
+      - /usr/bin/pacman
+      - /usr/bin/dpkg-divert
+      - /bin/dpkg-divert
+      - /sbin/apk
+      - /usr/sbin/apk
+      - /usr/local/sbin/apk
+      - /usr/bin/apt
+      - /usr/sbin/pacman
+      - /bin/podman
+      - /usr/bin/podman
+      - /usr/bin/puppet
+      - /bin/puppet
+      - /opt/puppetlabs/puppet/bin/puppet
+      - /usr/bin/chef-client
+      - /bin/chef-client
+      - /bin/autossl_check
+      - /usr/bin/autossl_check
+      - /proc/self/exe
+      - /dev/fd/*
+      - /usr/bin/pamac-daemon
+      - /bin/pamac-daemon
+      - /usr/lib/snapd/snapd
+      - /usr/local/bin/dockerd
+      - /usr/sbin/pam-auth-update
+      - /usr/lib/systemd/systemd
+      - /usr/libexec/packagekitd
+      - /usr/bin/bsdtar
+  exclusion2:
+    file.path|contains:
+      - /tmp/snap.rootfs_*/pam_*.so
+      - /tmp/newroot/lib/*/pam_*.so
+      - /tmp/newroot/usr/lib64/security/pam_*.so
+  exclusion3:
+    file.extension|contains:
+      - swp
+      - swpx
+      - swx
+      - dpkg-remove
+  exclusion4:
+    file.extension:
+      - dpkg-new
+  exclusion5:
+    process.executable|contains:
+      - /nix/store/*
+      - /var/lib/dpkg/*
+      - /snap/*
+      - /dev/fd/*
+      - /usr/lib/virtualbox/*
+  exclusion6:
+    process.name:
+      - sed
+    file.name:
+      - sed*
+  exclusion7:
+    process.name:
+      - perl
+    file.name:
+      - e2scrub_all.tmp*

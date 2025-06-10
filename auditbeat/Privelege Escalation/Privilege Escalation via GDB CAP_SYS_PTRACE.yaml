@@ -1,0 +1,68 @@
+id: ""
+logsource:
+  product: linux
+title: Privilege Escalation via GDB CAP_SYS_PTRACE
+description: >-
+  Identifies instances where GDB (granted the CAP_SYS_PTRACE capability) is
+  executed, after which the user access is elevated to UID/GID 0. In Linux, the
+  CAP_SYS_PTRACE capability grants a process the ability to use the ptrace
+  system call, which is typically used for debugging and allows the process to
+  trace and control other processes.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1055
+  - attack.T1055.008
+  - attack.T1068
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1055/'
+  - 'https://attack.mitre.org/techniques/T1055/008/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and
+    (Selection_5 or Selection_6) and not Selection_7)) or (Selection_8
+    Selection_9 and Selection_10 and not Selection_11 and Selection_12)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - gdb
+  Selection_5:
+    process.thread.capabilities.effective|all:
+      - CAP_SYS_PTRACE
+  Selection_6:
+    process.thread.capabilities.permitted|all:
+      - CAP_SYS_PTRACE
+  Selection_7:
+    user.id|all:
+      - '0'
+  Selection_8:
+    host.os.type|all:
+      - linux
+  Selection_9:
+    event.type|all:
+      - start
+  Selection_10:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_11:
+    process.name|all:
+      - 'null'
+  Selection_12:
+    user.id|all:
+      - '0'

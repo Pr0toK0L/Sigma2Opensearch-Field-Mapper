@@ -1,0 +1,42 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Network Connection via Sudo Binary
+description: >-
+  Detects network connections initiated by the sudo binary. This behavior is
+  uncommon and may occur in instances where reverse shell shellcode is injected
+  into a process run with elevated permissions via sudo. Attackers may attempt
+  to inject shellcode into processes running as root, to escalate privileges.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1055
+  - attack.T1055.008
+  - attack.T1548
+  - attack.T1548.003
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1055/'
+  - 'https://attack.mitre.org/techniques/T1055/008/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/003/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - connection_attempted
+      - ipv4_connection_attempt_event
+      - connected-to
+  Selection_4:
+    process.name|all:
+      - sudo

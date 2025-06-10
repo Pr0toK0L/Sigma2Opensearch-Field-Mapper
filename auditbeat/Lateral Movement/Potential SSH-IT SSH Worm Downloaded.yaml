@@ -1,0 +1,39 @@
+id: ""
+logsource:
+  product: linux
+title: Potential SSH-IT SSH Worm Downloaded
+description: >-
+  Identifies processes capable of downloading files with command line containing
+  SSH worm.
+tags:
+  - attack.Lateral_Movement
+  - attack.TA0008
+  - attack.T1021
+  - attack.SSH
+  - attack.T1021.004
+  - attack.T1563
+  - attack.T1563.001
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0008/'
+  - 'https://attack.mitre.org/techniques/T1021/'
+  - 'https://attack.mitre.org/techniques/T1021/004/'
+  - 'https://attack.mitre.org/techniques/T1563/'
+  - 'https://attack.mitre.org/techniques/T1563/001/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2
+  Selection_1:
+    process.args|contains:
+      - curl
+      - wget
+  Selection_2:
+    process.args|contains:
+      - 'https://thc.org/ssh-it/x'
+      - 'http://nossl.segfault.net/ssh-it-deploy.sh'
+      - 'https://gsocket.io/x'
+      - 'https://thc.org/ssh-it/bs'
+      - 'http://nossl.segfault.net/bs'

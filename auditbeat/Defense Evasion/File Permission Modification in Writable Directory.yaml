@@ -1,0 +1,42 @@
+id: ''
+logsource:
+  product: linux
+title: File Permission Modification in Writable Directory
+description: >-
+  Identifies file permission modifications in common writable directories by a
+  non-root user. Adversaries often drop files or payloads into a writable
+  directory and change permissions prior to execution.
+tags:
+  - attack.defense_evasion
+  - attack.t1222
+  - attack.TA0005
+falsepositives:
+  - >-
+    Certain programs or applications may modify files or change ownership in
+    writable directories. These can be exempted by username.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.category:
+      - process
+    event.type:
+      - start
+    process.name|contains:
+      - chattr
+      - chgrp
+      - chmod
+      - chown
+    process.working_directory|contains:
+      - /dev/shm
+      - /tmp
+      - /var/tmp
+  Selection_2:
+    process.name|contains:
+      - apt-key
+      - update-motd-updates-available

@@ -1,0 +1,34 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Privilege Escalation via PKEXEC
+description: >-
+  Identifies an attempt to exploit a local privilege escalation in polkit pkexec
+  (CVE-2021-4034) via unsecure environment variable injection. Successful
+  exploitation allows an unprivileged user to escalate to the root user.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.Defense_Evasion
+  - attack.TA0005
+  - attack.T1574
+  - attack.T1574.007
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+  - 'https://attack.mitre.org/tactics/TA0005/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+  - 'https://attack.mitre.org/techniques/T1574/007/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    file.path|contains:
+      - GCONV_PATH

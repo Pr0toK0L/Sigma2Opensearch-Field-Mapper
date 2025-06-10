@@ -1,0 +1,63 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Chroot Container Escape via Mount
+description: >-
+  Monitors for the execution of a file system mount followed by a chroot
+  execution. Given enough permissions, a user within a container is capable of
+  mounting the root file system of the host, and leveraging chroot to escape its
+  containarized environment. This behavior pattern is very uncommon and should
+  be investigated.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1611
+falsepositives: []
+level: medium
+status: stable
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1611/'
+author: Elastic
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_5 and
+    Selection_4) or (Selection_6 and Selection_7 and Selection_8 and
+    Selection_9)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|contains:
+      - mount
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  Selection_5:
+    process.args|startswith:
+      - /dev/sd.
+  Selection_6:
+    host.os.type|all:
+      - linux
+  Selection_7:
+    event.type|contains:
+      - start
+  Selection_8:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_9:
+    process.name|all:
+      - chroot

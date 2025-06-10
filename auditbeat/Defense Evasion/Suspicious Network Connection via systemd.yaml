@@ -1,0 +1,51 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Suspicious Network Connection via systemd
+description: >-
+  Detects suspicious network events executed by systemd, potentially indicating
+  persistence through a systemd backdoor. Systemd is a system and service
+  manager for Linux operating systems, used to initialize and manage system
+  processes. Attackers can backdoor systemd for persistence by creating or
+  modifying systemd unit files to execute malicious scripts or commands, or by
+  replacing legitimate systemd binaries with compromised ones, ensuring that
+  their malicious code is automatically executed at system startup or during
+  certain system events.
+tags:
+  - attack.defense_evasion
+  - attack.command_and_control
+  - attack.persistence
+  - attack.t1543
+  - attack.t1574
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+
+    event.action|contains:
+      - exec
+      - connection_attempted
+      - executed
+      - connected-to
+
+    process.name|contains:
+      - systemd
+      - 'python*'
+      - 'php*'
+      - perl
+      - ruby
+      - 'lua*'
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk

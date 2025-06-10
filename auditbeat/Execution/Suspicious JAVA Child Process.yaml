@@ -1,0 +1,77 @@
+id: 12345678-90ab-cdef-1234-567890abcdef
+logsource:
+  product: linux
+title: Suspicious JAVA Child Process
+description: >-
+  Identifies suspicious child processes of the Java interpreter process. This
+  may indicate an attempt to execute a malicious JAR file or an exploitation
+  attempt via a JAVA specific vulnerability.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.t1059
+  - attack.t1059.007
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1059/'
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    event.category:
+      - process
+    event.type|contains:
+      - start
+      - process_started
+    process.name:
+      - java
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk
+      - socat
+      - wget
+      - curl
+    process.args|contains:
+      - whoami
+      - id
+      - uname
+      - cat
+      - hostname
+      - ip
+      - curl
+      - wget
+      - pwd
+      - ls
+      - cd
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk
+      - socat

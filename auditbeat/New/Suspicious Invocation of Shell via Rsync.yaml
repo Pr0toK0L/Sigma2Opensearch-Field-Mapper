@@ -1,0 +1,35 @@
+title: Suspicious Invocation of Shell via Rsync
+status: experimental
+description: |
+    Detects the execution of a shell as sub process of "rsync" without the expected command line flag "-e" being used, which could be an indication of exploitation as described in CVE-2024-12084. This behavior is commonly associated with attempts to execute arbitrary commands or escalate privileges, potentially leading to unauthorized access or further exploitation.
+references:
+    - https://sysdig.com/blog/detecting-and-mitigating-cve-2024-12084-rsync-remote-code-execution/
+    - https://gist.github.com/Neo23x0/a20436375a1e26524931dd8ea1a3af10
+author: hoang.nguyen
+date: 2025-01-18
+tags:
+    - attack.execution
+    - attack.t1059
+    - attack.t1203
+logsource:
+    product: linux
+detection:
+    selection:
+        process.executable|endswith:
+            - '/rsync'
+            - '/rsyncd'
+        process.args|contains:
+            - '/ash'
+            - '/bash'
+            - '/csh'
+            - '/dash'
+            - '/ksh'
+            - '/sh'
+            - '/tcsh'
+            - '/zsh'
+    filter_main_expected:
+        process.args|contains: ' -e '
+    condition: selection and not 1 of filter_main_*
+falsepositives:
+    - Unknown
+level: high

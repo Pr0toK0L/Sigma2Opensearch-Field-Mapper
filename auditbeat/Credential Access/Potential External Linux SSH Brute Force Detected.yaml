@@ -1,0 +1,70 @@
+id: ""
+logsource:
+  product: linux
+title: Potential External Linux SSH Brute Force Detected
+description: >-
+  Identifies multiple external consecutive login failures targeting a user
+  account from the same source address within a short time interval.
+tags:
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.Brute_Force
+  - attack.T1110
+  - attack.Password_Guessing
+  - attack.T1110.001
+  - attack.Password_Spraying
+  - attack.T1110.003
+  - attack.filebeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1110/'
+  - 'https://attack.mitre.org/techniques/T1110/001/'
+  - 'https://attack.mitre.org/techniques/T1110/003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and not (Selection_4 or
+    Selection_5)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.action|contains:
+      - ssh_login
+      - user_login
+      - login
+  Selection_3:
+    event.outcome|all:
+      - failure
+  Selection_4:
+    source.ip|cidr:
+      - 10.0.0.0/8
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.0.8/32
+      - 192.0.0.9/32
+      - 192.0.0.10/32
+      - 192.0.0.170/32
+      - 192.0.0.171/32
+      - 192.0.2.0/24
+      - 192.31.196.0/24
+      - 192.52.193.0/24
+      - 192.88.99.0/24
+      - 192.168.0.0/16
+      - 224.0.0.0/4
+      - 100.64.0.0/10
+      - 192.175.48.0/24
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 240.0.0.0/4
+  Selection_5:
+    source.ip|contains:
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'

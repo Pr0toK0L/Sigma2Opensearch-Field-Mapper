@@ -1,0 +1,25 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Linux User Account Creation
+description: >-
+  Identifies attempts to create new users. Attackers may add new users to establish persistence on a system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1136
+  - attack.t1136.001
+  - attack.filebeat
+  - attack.t1078
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    process.name|contains:
+      - useradd
+      - adduser
+falsepositives:
+  - Legitimate use of useradd or adduser to create new users by system administrators or automated tools

@@ -1,0 +1,63 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation Python cap_setuid
+description: >-
+  This detection rule monitors for the execution of a system command with setuid
+  or setgid capabilities via Python, followed by a uid or gid change to the root
+  user. This sequence of events may indicate successful privilege escalation.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.T1548
+  - attack.T1548.001
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/001/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and Selection_6 and not Selection_7) or (Selection_8 and Selection_9 and
+    (Selection_10 or Selection_11))
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.args|contains:
+      - import os;os.set?id(0);os.system(
+  Selection_5:
+    process.args|contains:
+      - python
+  Selection_6:
+    user.id|all:
+      - '0'
+  Selection_7:
+    host.os.type|all:
+      - linux
+  Selection_8:
+    event.action|contains:
+      - uid_change
+      - gid_change
+  Selection_9:
+    event.type|all:
+      - change
+  Selection_10:
+    user.id|all:
+      - '0'
+  Selection_11:
+    group.id|all:
+      - '0'

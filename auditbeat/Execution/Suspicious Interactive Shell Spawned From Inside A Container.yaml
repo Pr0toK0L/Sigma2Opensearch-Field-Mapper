@@ -1,0 +1,40 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Suspicious Interactive Shell Spawned InContainer
+description: >-
+  This rule detects when an interactive shell is spawned inside a running
+  container. This could indicate a potential container breakout attempt or an
+  attackers attempt to gain unauthorized access to the underlying host.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+  - attack.T1059.004
+falsepositives:
+  - >-
+    Legitimate users and processes, such as system administration tools, may
+    utilize shell utilities inside a container resulting in false positives.
+level: high
+status: experimental
+references: []
+author: elastic
+detection:
+  condition: Selection and Selection_3 and not Selection_2
+  Selection:
+    event.type:
+      - start
+    event.action|contains:
+      - fork
+      - exec
+      - executed
+  Selection_2:
+    event.action|all:
+      - end
+  Selection_3:
+    process.executable|contains:
+      - 'sh'
+    process.args|contains:
+      - '-i'
+      - '-it'
+      - '*/*sh'

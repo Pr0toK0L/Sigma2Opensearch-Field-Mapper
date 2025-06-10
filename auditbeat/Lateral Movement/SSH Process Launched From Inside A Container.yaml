@@ -1,0 +1,43 @@
+id: ""
+logsource:
+  product: linux
+title: SSH Process Launched From Inside A Container
+description: >-
+  This rule detects an SSH or SSHD process executed from inside a container.
+  This includes both the client ssh binary and server ssh daemon process.
+tags:
+  - attack.Lateral_Movement
+  - attack.TA0008
+  - attack.T1021
+  - attack.T1021.004
+  - attack.Persistence
+  - attack.TA0003
+  - attack.T1133
+falsepositives: []
+level: high
+status: stable
+references:
+  - 'https://attack.mitre.org/tactics/TA0008/'
+  - 'https://attack.mitre.org/techniques/T1021/'
+  - 'https://attack.mitre.org/techniques/T1021/004/'
+  - 'https://attack.mitre.org/tactics/TA0003/'
+  - 'https://attack.mitre.org/techniques/T1133/'
+author: hoang.nguyen
+detection:
+  condition: Selection_2 and Selection_3 and not Selection_4 and Selection_5
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - fork
+      - exec
+      - executed
+  Selection_4:
+    event.action|all:
+      - end
+  Selection_5:
+    process.args|contains:
+      - sshd
+      - ssh
+      - autossh

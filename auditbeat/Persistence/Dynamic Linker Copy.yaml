@@ -1,0 +1,48 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Dynamic Linker Copy
+description: >-
+  Detects the copying of the Linux dynamic loader binary and subsequent file
+  creation for the purpose of creating a backup copy. This technique was seen
+  recently being utilized by Linux malware prior to patching the dynamic loader
+  in order to inject and preload a malicious shared object file. This activity
+  should never occur and if it does then it should be considered highly
+  suspicious or malicious.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1574
+  - attack.t1574.006
+falsepositives:
+  - >-
+    Legitimate use of copying dynamic linker binaries for backup or system
+    maintenance
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: filter1 and filter2
+  filter1:
+    process.name|contains:
+      - cp
+      - rsync
+    process.args|contains:
+      - /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      - /etc/ld.so.preload
+      - /lib64/ld-linux-x86-64.so.2
+      - /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      - /usr/lib64/ld-linux-x86-64.so.2
+    event.type|contains:
+      - start
+    host.os.type|all:
+      - linux
+  filter2:
+    file.extension|contains:
+      - so
+    event.action|contains:
+      - creation
+      - create
+    host.os.type|contains:
+      - linux

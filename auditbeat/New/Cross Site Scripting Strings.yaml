@@ -1,0 +1,40 @@
+title: Cross Site Scripting Strings
+status: experimental
+description: Detects XSS attempts injected via GET requests in access logs
+references:
+    - https://github.com/payloadbox/xss-payload-list
+    - https://portswigger.net/web-security/cross-site-scripting/contexts
+author: hoang.nguyen
+tags:
+    - attack.initial-access
+    - attack.t1189
+logsource:
+    product: apache_access
+detection:
+    select_method:
+        apache_method: GET
+        apache_path|contains:
+        - '=<script>'
+        - '=%3Cscript%3E'
+        - '=%253Cscript%253E'
+        - '<iframe '
+        - '%3Ciframe '
+        - '<svg '
+        - '%3Csvg '
+        - 'document.cookie'
+        - 'document.domain'
+        - ' onerror='
+        - ' onresize='
+        - ' onload="'
+        - 'onmouseover='
+        - '${alert'
+        - 'javascript:alert'
+        - 'javascript%3Aalert'
+    filter:
+        apache_code: 404
+    condition: select_method and not filter
+falsepositives:
+    - JavaScripts,CSS Files and PNG files
+    - User searches in search boxes of the respective website
+    - Internal vulnerability scanners can cause some serious FPs when used, if you experience a lot of FPs due to this think of adding more filters such as "User Agent" strings and more response codes
+level: high

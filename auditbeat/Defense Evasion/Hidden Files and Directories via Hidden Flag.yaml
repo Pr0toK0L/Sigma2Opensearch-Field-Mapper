@@ -1,0 +1,22 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Hidden Files and Directories via Hidden Flag
+description: ' Identify activity related where adversaries can add the hidden flag to files to hide them from the user in an attempt to evade detection.'
+tags:
+  - attack.defense_evasion
+  - attack.TA0005
+  - attack.t1564
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    event.type|contains:
+      - creation
+      - create
+    process.name|all:
+      - chflags

@@ -1,0 +1,141 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Process Spawned from Message of the Day MOTD
+description: >-
+  Message of the day (MOTD) is the message that is presented to the user when a
+  user connects to a Linux server via SSH or a serial connection. Linux systems
+  contain several default MOTD files located in the /etc/update-motd.d/
+  directory. These scripts run as the root user every time a user connects over
+  SSH or a serial connection. Adversaries may create malicious MOTD files that
+  grant them persistence onto the target every time a user connects to the
+  system by executing a backdoor script or command. This rule detects the
+  execution of potentially malicious processes through the MOTD utility.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1037
+falsepositives: []
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection and (filter1 or (filter2 and not filter2_1) or filter3 or filter4
+    or filter5 or filter6 or filter7 or filter8 or filter9 or filter10) and not
+    (filter11 or filter12 or filter13)
+  selection:
+    event.type|all:
+      - start
+    host.os.type|all:
+      - linux
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+    process.executable|contains:
+      - /etc/update-motd.d/*
+  filter1:
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+    process.args|contains:
+      - '-i'
+      - '-l'
+    ' process.name|all':
+      - socat
+    process.args|all:
+      - '*exec*'
+  filter2:
+    process.name|contains:
+      - nc
+      - ncat
+      - netcat
+      - nc.openbsd'
+  filter2_1:
+    process.args|contains:
+      - '-*z*'
+      - '-*l*'
+  filter3:
+    process.name|all:
+      - python*
+    process.args|all:
+      - '-c'
+    process.args|contains:
+      - '*import*pty*spawn*'
+      - '*import*subprocess*call*'
+  filter4:
+    process.name|all:
+      - perl*
+    process.args|all:
+      - '-e'
+    process.args|contains:
+      - '*socket*'
+      - '*exec*'
+      - '*system*'
+  filter5:
+    process.name|all:
+      - ruby*
+    process.args|contains:
+      - '*TCPSocket.new*'
+      - '*TCPSocket.open*'
+  filter6:
+    process.name|all:
+      - lua*
+    process.args|all:
+      - '-e'
+    process.args|contains:
+      - '*socket.tcp*'
+      - '*io.popen*'
+      - '*os.execute*'
+  filter7:
+    process.name|all:
+      - php
+    process.args|all:
+      - '-r'
+    process.args|contains:
+      - '*fsockopen*'
+      - '*/bin/*sh*'
+  filter8:
+    process.name|contains:
+      - awk
+      - gawk
+      - mawk
+      - nawk
+    process.args|all:
+      - '*/inet/tcp/*'
+  filter9:
+    process.name|contains:
+      - openssl
+      - telnet
+  filter10:
+    process.args|contains:
+      - ./*
+      - /boot/*
+      - /dev/shm/*
+      - /etc/cron.*/*
+      - /etc/init.d/*
+      - /etc/update-motd.d/*
+      - /run/*
+      - /srv/*
+      - /tmp/*
+      - /var/tmp/*
+      - /var/log/*
+      - /opt/*
+  filter11:
+    process.args|all:
+      - '--force'
+  filter12:
+    process.args|contains:
+      - /usr/games/lolcat
+      - /usr/bin/screenfetch
+  filter13:
+    process.name|all:
+      - system-crash-notification

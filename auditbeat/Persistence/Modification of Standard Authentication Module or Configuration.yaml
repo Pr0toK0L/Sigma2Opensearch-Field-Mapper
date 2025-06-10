@@ -1,0 +1,77 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Modification of Standard Authen Module or Config
+description: >-
+  Adversaries may modify the standard authentication module for persistence via
+  patching the normal authorization process or modifying the login configuration
+  to allow unauthorized access or elevate privileges.
+tags:
+  - attack.credential_access
+  - attack.persistence
+  - attack.TA0003
+  - attack.TA0006
+  - attack.t1543
+  - attack.t1556
+  - attack.auditbeat
+falsepositives:
+  - >-
+    Trusted system module updates or allowed Pluggable Authentication Module
+    (PAM) daemon configuration changes
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not (filter1 or filter2 or filter3)
+  selection:
+    event.category|all:
+      - file
+    event.type|contains:
+      - change
+      - create
+    file.name|contains:
+      - pam_*.so
+    file.path|contains:
+      - /etc/pam.d/*
+      - /private/etc/pam.d/*
+      - /usr/lib64/security/*
+  filter1:
+    process.executable|contains:
+      - /usr/libexec/packagekitd
+      - /usr/bin/vim
+      - /usr/libexec/xpcproxy
+      - /usr/bin/bsdtar
+      - /usr/local/bin/brew
+      - >-
+        /System/Library/PrivateFrameworks/PackageKit.framework/Versions/A/XPCServices/package_script_service.xpc/Contents/MacOS/package_script_service
+  filter2:
+    file.path|contains:
+      - /tmp/snap.rootfs_*/pam_*.so
+      - /tmp/newroot/lib/*/pam_*.so
+      - >-
+        /private/var/folders/*/T/com.apple.fileprovider.ArchiveService/TemporaryItems/*/lib/security/pam_*.so
+      - /tmp/newroot/usr/lib64/security/pam_*.so
+  filter3:
+    process.name|contains:
+      - yum
+      - dnf
+      - rsync
+      - platform-python
+      - authconfig
+      - rpm
+      - pdkg
+      - apk
+      - dnf-automatic
+      - btrfs
+      - dpkg
+      - pam-auth-update
+      - steam
+      - platform-python3.6
+      - pam-config
+      - microdnf
+      - yum_install
+      - yum-cron
+      - systemd
+      - containerd
+      - pacman

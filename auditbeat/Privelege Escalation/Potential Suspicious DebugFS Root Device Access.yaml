@@ -1,0 +1,46 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Suspicious DebugFS Root Device Access
+description: >-
+  This rule monitors for the usage of the built-in Linux DebugFS utility to
+  access a disk device without root permissions. Linux users that are part of
+  the disk group have sufficient privileges to access all data inside of the
+  machine through DebugFS.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1078
+  - attack.T1078.003
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1078/'
+  - 'https://attack.mitre.org/techniques/T1078/003/'
+author: Elastic
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and not Selection_6
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  Selection_4:
+    process.name|all:
+      - debugfs
+  Selection_5:
+    process.args|startswith:
+      - /dev/sd.
+  Selection_6:
+    process.args|all:
+      - '-R'

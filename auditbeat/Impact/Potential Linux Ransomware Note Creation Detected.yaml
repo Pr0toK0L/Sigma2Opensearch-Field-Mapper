@@ -1,0 +1,76 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Linux Ransomware Note Creation Detected
+description: >-
+  This rule identifies a sequence of a mass file encryption event in conjunction
+  with the creation of a .txt file with a file name containing ransomware
+  keywords executed by the same process in a 1 second timespan.
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1486
+falsepositives: []
+level: medium
+status: stable
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1486/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|contains:
+      - change
+      - file
+  Selection_3:
+    event.action|contains:
+      - rename
+      - change
+      - creation
+  Selection_4:
+    process.executable|contains:
+      - ./*
+      - /tmp/*
+      - /var/tmp/*
+      - /dev/shm/*
+      - /var/run/*
+      - /boot/*
+      - /srv/*
+      - /run/*
+  Selection_5:
+    process.name|contains:
+      - dpkg
+      - yum
+      - dnf
+      - rpm
+      - dockerd
+      - go
+      - java
+      - pip*
+      - python*
+      - node
+      - containerd
+      - php
+      - p4d
+      - conda
+      - chrome
+      - imap
+      - cmake
+      - firefox
+      - semanage
+      - semodule
+      - ansible-galaxy
+      - fc-cache
+      - jammy
+      - git
+      - systemsettings
+      - vmis-launcher
+      - bundle
+      - kudu-tserver
+      - suldownloader

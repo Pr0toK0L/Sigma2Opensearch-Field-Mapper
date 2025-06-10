@@ -1,0 +1,88 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation Compiled Executable
+description: >-
+  This rule monitors a sequence involving a program compilation event followed
+  by its execution and a subsequent alteration of UID permissions to root
+  privileges. This behavior can potentially indicate the execution of a kernel
+  or software privilege escalation exploit.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_4 and Selection_4 and not
+    Selection_5) or (Selection_6 and Selection_7 and Selection_8 and Selection_9
+    and not Selection_10) or (Selection_11 and Selection_12 and Selection_13 and
+    not Selection_14) or (Selection_15 and Selection_16 and Selection_17 and
+    Selection_18)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|contains:
+      - gcc
+      - g++
+      - cc
+  Selection_5:
+    user.id|all:
+      - '0'
+  Selection_6:
+    host.os.type|all:
+      - linux
+  Selection_7:
+    event.action|contains:
+      - creation
+      - create
+  Selection_8:
+    event.type|contains:
+      - creation
+      - create
+  Selection_9:
+    process.name|all:
+      - ld
+  Selection_10:
+    user.id|all:
+      - '0'
+  Selection_11:
+    host.os.type|all:
+      - linux
+  Selection_12:
+    event.type|all:
+      - start
+  Selection_13:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_14:
+    user.id|all:
+      - '0'
+  Selection_15:
+    host.os.type|all:
+      - linux
+  Selection_16:
+    event.action|contains:
+      - uid_change
+      - guid_change
+  Selection_17:
+    event.type|all:
+      - change
+  Selection_18:
+    user.id|all:
+      - '0'

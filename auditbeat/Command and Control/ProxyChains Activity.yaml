@@ -1,0 +1,47 @@
+id: ""
+logsource:
+  product: linux
+title: ProxyChains Activity
+description: This rule monitors for the execution of the ProxyChains utility.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1572
+  - attack.auditbeat
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions.
+  - >-
+    If this activity is related to a system administrator or developer who uses
+    this utility for benign purposes, consider adding exceptions for specific
+    user accounts or hosts.
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need. 
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1572/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|contains:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+  Selection_4:
+    process.name|all:
+      - proxychains

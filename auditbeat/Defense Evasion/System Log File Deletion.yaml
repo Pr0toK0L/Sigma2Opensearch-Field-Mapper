@@ -1,0 +1,45 @@
+id: ''
+logsource:
+  product: linux
+title: System Log File Deletion
+description: >-
+  Identifies the deletion of sensitive Linux system logs. This may indicate an
+  attempt to evade detection or destroy forensic evidence on a system.
+tags:
+  - attack.defense_evasion
+  - attack.t1070
+  - attack.TA0005
+falsepositives:
+  - >-
+    Legitimate administrative actions such as log rotation or cleanup
+    activities.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - deletion
+      - delete
+      - deleted
+    file.path|contains:
+      - /var/run/utmp
+      - /var/log/wtmp
+      - /var/log/btmp
+      - /var/log/lastlog
+      - /var/log/faillog
+      - /var/log/syslog
+      - /var/log/messages
+      - /var/log/secure
+      - /var/log/auth.log
+      - /var/log/boot.log
+      - /var/log/kern.log
+  Selection_2:
+    process.name|contains:
+      - gzip
+      - executor
+      - dockerd

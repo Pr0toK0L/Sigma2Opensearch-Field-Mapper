@@ -1,0 +1,37 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Masquerading Space After Filename
+description: >-
+  This rule identifies a process created from an executable with a space
+  appended to the end of the filename. This may indicate an attempt to
+  masquerade a malicious file as benign to gain user execution.When a space is
+  added to the end of certain files, the OS will execute the file according to
+  its true filetype instead of its extension. Adversaries can hide a programs
+  true filetype by changing the extension of the file. They can then add a space
+  to the end of the name so that the OS automatically executes the file when its
+  double-clicked.
+tags:
+  - attack.defense_evasion
+  - attack.TA0005
+  - attack.t1036
+falsepositives:
+  - Legitimate administrative scripts or commands with trailing spaces
+level: medium
+status: experimental
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not filter
+  Selection_1:
+    host.os.type|contains:
+      - linux
+    event.type|all:
+      - start
+    process.executable|contains:
+      - "/[a-z0-9\s_\-\\./]+\s"
+  filter:
+    process.name|contains:
+      - ls
+      - find
+      - grep
+      - xkbcomp

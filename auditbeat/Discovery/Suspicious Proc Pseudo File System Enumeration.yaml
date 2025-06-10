@@ -1,0 +1,52 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Proc Pseudo File System Enumeration
+description: >-
+  This rule monitors for a rapid enumeration of 25 different proc cmd, stat, and
+  exe files, which suggests an abnormal activity pattern.
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1057
+  - attack.T1082
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1057/'
+  - 'https://attack.mitre.org/techniques/T1082/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5 and not Selection_6
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.category|contains:
+      - file
+  Selection_3:
+    event.action|all:
+      - opened-file
+  Selection_4:
+    file.path|contains:
+      - /proc/*/cmdline
+      - /proc/*/stat
+      - /proc/*/exe
+  Selection_5:
+    process.name|contains:
+      - ps
+      - netstat
+      - landscape-sysin
+      - w
+      - pgrep
+      - pidof
+      - needrestart
+      - apparmor_status
+  Selection_6:
+    process.parent.pid|all:
+      - 1

@@ -1,0 +1,45 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Process Capability Set via setcap Utility
+description: >-
+  This rule detects the use of the setcap utility to set capabilities on a
+  process. The setcap utility is used to set the capabilities of a binary to
+  allow it to perform privileged operations without needing to run as root. This
+  can be used by attackers to establish persistence by creating a backdoor, or
+  escalate privileges by abusing a misconfiguration on a system.
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.TA0003
+  - attack.TA0004
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/TA0003/'
+  - 'https://attack.mitre.org/techniques/TA0004/'
+author: hoang.nguyen
+detection:
+  condition: selection and not filter
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+    process.name:
+      - setcap
+  filter:
+    process.executable|contains:
+      - 'null'
+      - /var/lib/dpkg/*
+      - /var/lib/docker/*
+      - /tmp/newroot/*
+      - /var/tmp/newroot/*
+    process.name|contains:
+      - jem
+      - vzctl

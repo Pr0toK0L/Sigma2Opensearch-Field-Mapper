@@ -1,0 +1,52 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Linux User Added to Privileged Group
+description: >-
+  Identifies attempts to add a user to a privileged group. Attackers may add
+  users to a privileged group in order to establish persistence on a system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1136
+  - attack.t1136.001
+falsepositives:
+  - >-
+    Legitimate use of usermod, adduser, or gpasswd to add users to privileged
+    groups by system administrators or automated tools
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.args|contains:
+      - root
+      - admin
+      - wheel
+      - staff
+      - sudo
+      - disk
+      - video
+      - shadow
+      - lxc
+      - lxd
+    process.name|contains:
+      - usermod
+      - adduser
+      - gpasswd
+    process.args|contains:
+      - "-a"
+      - "--add"
+      - "-M"
+      - "--members"

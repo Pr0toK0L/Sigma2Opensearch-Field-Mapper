@@ -1,0 +1,27 @@
+title: Detection of SUID File Enumeration Commands
+id: 9f8e7d6b-3c2a-4b9e-8f4d-1a2b2c6e9d3a
+description: Detects attempts to enumerate files with the SUID bit set, which may indicate privilege escalation reconnaissance.
+status: experimental
+author: hoang.nguyen
+logsource:
+  product: linux
+detection:
+  selection_find:
+    file.path: '/usr/bin/find'
+    process.args|contains:
+      - '-perm'
+      - '-4000'
+  selection_ls_awk:
+    file.path: '/usr/bin/awk'
+    process.args|contains: ['$1 ~ /^-..s/']
+  selection_stat:
+    file.path: '/usr/bin/stat'
+    process.args|contains: ['%A']
+  condition: selection_find or selection_ls_awk or selection_stat
+falsepositives:
+  - Legitimate administrative tasks performed by system administrators.
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1082
+  - attack.t1069

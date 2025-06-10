@@ -1,0 +1,22 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+  service: syslog
+title: Segfault Detected
+description: >-
+  Monitors kernel logs for segfault messages. A segfault, or segmentation fault, is an error that occurs when a program tries to access a memory location that its not allowed to access, typically leading to program termination. A segfault can be an indication of malicious behavior if it results from attempts to exploit buffer overflows or other vulnerabilities in software to execute arbitrary code or disrupt its normal operation.
+tags:
+  - attack.execution
+  - attack.TA0002
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type: linux
+    event.dataset|contains: system.syslog
+    process.name: kernel
+    message|contains: segfault

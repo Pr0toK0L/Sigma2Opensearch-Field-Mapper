@@ -1,0 +1,31 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Tainted Out-Of-Tree Kernel Module Load
+description: >-
+  This rule monitors the syslog log file for messages related to instances of a
+  out-of-tree kernel module load, indicating the taining of the kernel. Rootkits
+  often leverage kernel modules as their main defense evasion technique.
+  Detecting tainted kernel module loads is crucial for ensuring system security
+  and integrity, as malicious or unauthorized modules can compromise the kernel
+  and lead to system vulnerabilities or unauthorized access.
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.t1547
+  - attack.t1014
+  - attack.t1547.006
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    host.os.type|all:
+      - linux
+    process.name|all:
+      - kernel
+    message|contains:
+      - loading out-of-tree module taints kernel.

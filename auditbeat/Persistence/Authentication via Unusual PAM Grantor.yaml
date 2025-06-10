@@ -1,0 +1,46 @@
+id: b3e04e5c-9784-4d9c-9b84-7f43b759f3b4
+logsource:
+  product: linux
+title: Authentication via Unusual PAM Grantor
+description: >-
+  This rule detects successful authentications via PAM grantors that are not
+  commonly used. This could indicate an attacker  is attempting to escalate
+  privileges or maintain persistence on the system by modifying the default PAM
+  configuration.
+tags:
+  - attack.persistence
+  - attack.credential_access
+  - attack.TA0003
+  - attack.TA0006
+  - attack.t1543
+  - attack.t1556
+  - attack.auditbeat
+falsepositives:
+  - >-
+    Legitimate use of uncommon PAM grantors by system administrators or
+    automated tools
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+  - 'https://attack.mitre.org/techniques/T1556/'
+author: hoang.nguyen
+detection:
+  condition: selection and (filter1 and not filter2)
+  selection:
+    event.category|contains:
+      - authentication
+    host.os.type:
+      - linux
+    event.action|contains:
+      - authenticated
+    event.outcome:
+      - success
+  filter1:
+    auditd.data.grantors|contains:
+      - '*'
+  filter2:
+    auditd.data.grantors|contains:
+      - pam_rootok
+      - '*pam_cap*'
+      - '*pam_permit*'

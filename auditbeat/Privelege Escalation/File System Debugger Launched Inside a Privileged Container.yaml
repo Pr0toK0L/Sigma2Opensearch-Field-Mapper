@@ -1,0 +1,33 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: File Sys Debug Launched In a Privileged Container
+description: >-
+  This rule detects the use of the built-in Linux DebugFS utility from inside a
+  privileged container. DebugFS is a special file system debugging utility which
+  supports reading and writing directly from a hard drive device. When launched
+  inside a privileged container, a container deployed with all the capabilities
+  of the host machine, an attacker can access sensitive host level files which
+  could be used for further privilege escalation and container escapes to the
+  host machine.
+tags:
+  - attack.privilege_escalation
+  - attack.TA0004
+  - attack.t1611
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not filter
+  Selection_1:
+    event.type|all:
+      - start
+    process.name|all:
+      - debugfs
+    process.args|contains:
+      - /dev/sd*
+  filter:
+    process.args|contains:
+      - '-R'

@@ -1,0 +1,89 @@
+id: ''
+logsource:
+  product: linux
+title: Potential Suspicious File Edit
+description: >-
+  This rule monitors for the potential edit of a suspicious file. In Linux, when
+  editing a file through an editor, a temporary .swp file is created. By
+  monitoring for the creation of this .swp file, we can detect potential file
+  edits of suspicious files. The execution of this rule is not a clear sign of
+  the file being edited, as just opening the file through an editor will trigger
+  this event. Attackers may alter any of the files added in this rule to
+  establish persistence, escalate privileges or perform reconnaissance on the
+  system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.T1037
+  - attack.T1543
+  - attack.T1574
+  - attack.privilege_escalation
+  - attack.TA0004
+  - attack.T1548
+  - attack.T1548.003
+  - attack.T1574.006
+falsepositives:
+  - Legitimate use of file editors by system administrators or automated tools.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type:
+      - linux
+    event.action|contains:
+      - creation
+      - file_create_event
+      - create
+    file.extension:
+      - swp
+    file.path|contains:
+      - /etc/.shadow.swp
+      - /etc/.shadow-.swp
+      - /etc/.shadow~.swp
+      - /etc/.gshadow.swp
+      - /etc/.gshadow-.swp
+      - /etc/.passwd.swp
+      - /etc/.pwd.db.swp
+      - /etc/.master.passwd.swp
+      - /etc/.spwd.db.swp
+      - /etc/security/.opasswd.swp
+      - /etc/.environment.swp
+      - /etc/.profile.swp
+      - /etc/sudoers.d/.*.swp
+      - /etc/ld.so.conf.d/.*.swp
+      - /etc/init.d/.*.swp
+      - /etc/.rc.local.swp
+      - /etc/rc*.d/.*.swp
+      - /dev/shm/.*.swp
+      - /etc/update-motd.d/.*.swp
+      - /usr/lib/update-notifier/.*.swp
+      - /etc/systemd/system/.*.swp
+      - /usr/local/lib/systemd/system/.*.swp
+      - /lib/systemd/system/.*.swp
+      - /usr/lib/systemd/system/.*.swp
+      - /home/*/.config/systemd/user/.*.swp
+      - /run/.*.swp
+      - /var/run/.*.swp
+      - /home/*.profile.swp
+      - /home/*.bash_profile.swp
+      - /home/*.bash_login.swp
+      - /home/*.bashrc.swp
+      - /home/*.bash_logout.swp
+      - /home/*.zshrc.swp
+      - /home/*.zlogin.swp
+      - /home/*.tcshrc.swp
+      - /home/*.kshrc.swp
+      - /home/*.config.fish.swp
+      - /root/*.profile.swp
+      - /root/*.bash_profile.swp
+      - /root/*.bash_login.swp
+      - /root/*.bashrc.swp
+      - /root/*.bash_logout.swp
+      - /root/*.zshrc.swp
+      - /root/*.zlogin.swp
+      - /root/*.tcshrc.swp
+      - /root/*.kshrc.swp
+      - /root/*.config.fish.swp

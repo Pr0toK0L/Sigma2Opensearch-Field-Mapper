@@ -1,0 +1,79 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: File Creation Execution Self-Deletion in Sus Dir
+description: >-
+  This rule monitors for the creation of a file, followed by its execution and
+  self-deletion in a short timespan within a directory often used for malicious
+  purposes by threat actors. This behavior is often used by malware to execute
+  malicious code and delete itself to hide its tracks.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+falsepositives:
+  - >-
+    False positives can appear if the file creation, execution, and deletion are
+    part of legitimate processes or administrative tasks. Investigate the
+    context of the actions to determine if they are benign or malicious.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection1 and selection2 and (selection3 and not selection3_1)
+  selection1:
+    host.os.type:
+      - linux
+    event.action:
+      - creation
+    process.name|contains:
+      - curl
+      - wget
+      - fetch
+      - ftp
+      - sftp
+      - scp
+      - rsync
+      - ld
+    file.path|contains:
+      - /dev/shm/*
+      - /run/shm/*
+      - /tmp/*
+      - /var/tmp/*
+      - /run/*
+      - /var/run/*
+      - /var/www/*
+      - /proc/*/fd/*
+  selection2:
+    host.os.type:
+      - linux
+    event.type|contains:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name|contains:
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  selection3:
+    file.path|contains:
+      - /dev/shm/*
+      - /run/shm/*
+      - /tmp/*
+      - /var/tmp/*
+      - /run/*
+      - /var/run/*
+      - /var/www/*
+      - /proc/*/fd/*
+  selection3_1:
+    process.name|contains:
+      - rm
+      - ld

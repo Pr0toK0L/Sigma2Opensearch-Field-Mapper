@@ -1,0 +1,35 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: CAP_SYS_ADMIN Assigned to Binary
+description: >-
+  Identifies instances where a binary is granted the CAP_SYS_ADMIN capability.
+  In Linux, the CAP_SYS_ADMIN capability is a powerful and broad capability that
+  allows a process to perform a range of system administration operations, such
+  as  mounting and unmounting filesystems, configuring network interfaces, and
+  accessing hardware devices. Attackers may leverage  a misconfiguration for
+  exploitation in order to escalate their privileges to root. The rule
+  identifies previously unknown  processes executing with CAP_SYS_ADMIN
+  capabilities through the use of the new terms rule type.
+tags:
+  - attack.persistence
+  - attack.TA0003
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+author: hoang.nguyen
+detection:
+  selection:
+    event.category: process
+    host.os.type: linux
+    event.type: start
+    event.action: executed
+  filter1:
+    process.thread.capabilities.effective: CAP_SYS_ADMIN
+  filter2:
+    process.thread.capabilities.permitted: CAP_SYS_ADMIN
+  filter3:
+    user.id: '0'
+  condition: selection and (filter1 or filter2) and not filter3

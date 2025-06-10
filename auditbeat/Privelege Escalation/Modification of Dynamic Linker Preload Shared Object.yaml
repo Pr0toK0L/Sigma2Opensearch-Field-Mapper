@@ -1,0 +1,51 @@
+id: ""
+logsource:
+  product: linux
+title: Modification Dynamic Linker Preload Shared Object
+description: >-
+  Identifies modification of the dynamic linker preload shared object
+  (ld.so.preload). Adversaries may execute malicious payloads by hijacking the
+  dynamic linker used to load libraries.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1574
+  - attack.T1574.006
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+  - 'https://attack.mitre.org/techniques/T1574/006/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and not Selection_4 and
+    Selection_5 and not Selection_6
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.category|contains:
+      - file
+  Selection_3:
+    event.action|contains:
+      - updated
+      - renamed
+      - rename
+      - file_rename_event
+      - change
+      - create
+  Selection_4:
+    event.type|contains:
+      - deletion
+      - delete
+  Selection_5:
+    file.path|contains:
+      - /etc/ld.so.preload
+  Selection_6:
+    process.name|contains:
+      - wine
+      - oneagentinstallaction

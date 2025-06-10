@@ -1,0 +1,65 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Shadow File Read via Command Line Utils
+description: >-
+  Identifies access to the /etc/shadow file via the commandline using standard
+  system utilities. After elevating privileges to root, threat actors may
+  attempt to read or dump this file in order to gain valid credentials.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.T1003
+  - attack.T1003.008
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1003/'
+  - 'https://attack.mitre.org/techniques/T1003/008/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and (Selection_4 or (Selection_9
+    and Selection_10)) and not (Selection_5 and Selection_6) and not
+    (Selection_7 and Selection_8)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.category|all:
+      - process
+  Selection_3:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  Selection_4:
+    process.args|all:
+      - /etc/shadow
+  Selection_9:
+    process.working_directory|all:
+      - /etc
+  Selection_10:
+    process.args|all:
+      - shadow
+  Selection_5:
+    process.executable|contains:
+      - /bin/chown
+      - /usr/bin/chown
+  Selection_6:
+    process.args|all:
+      - 'root:shadow'
+  Selection_7:
+    process.executable|contains:
+      - /bin/chmod
+      - /usr/bin/chmod
+  Selection_8:
+    process.args|all:
+      - 640

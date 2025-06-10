@@ -1,0 +1,124 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Network Activity by Unknown Executable
+description: >-
+  This rule monitors for network connectivity to the internet from a previously
+  unknown executable located in a suspicious directory.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1071
+  - attack.auditbeat
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions.
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need.
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1071/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and not Selection_6 and not Selection_7 and not Selection_8
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.category|all:
+      - network
+  Selection_3:
+    event.action|contains:
+      - connection_attempted
+      - ipv4_connection_attempt_event
+      - connected-to
+  Selection_4:
+    process.executable|contains:
+      - /etc/crontab
+      - /etc/rc.local
+      - ./*
+      - /boot/*
+      - /dev/shm/*
+      - /etc/cron.*/*
+      - /etc/init.d/*
+      - /etc/rc*.d/*
+      - /etc/update-motd.d/*
+      - /home/*/.*
+      - /run/*
+      - /srv/*
+      - /tmp/*
+      - /usr/lib/update-notifier/*
+      - /var/tmp/*
+      - /var/log/*
+  Selection_5:
+    source.ip|contains:
+      - 10.0.0.0/8
+      - 127.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+  Selection_6:
+    process.name|contains:
+      - apt
+      - chrome
+      - curl
+      - dnf
+      - dockerd
+      - dpkg
+      - firefox-bin
+      - java
+      - kite-update
+      - kited
+      - node
+      - rpm
+      - saml2aws
+      - wget
+      - yum
+      - ansible*
+      - aws*
+      - php*
+      - pip*
+      - python*
+      - steam*
+      - terraform*
+  Selection_7:
+    destination.ip|contains:
+      - 10.0.0.0/8
+      - 100.64.0.0/10
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.0.0/29
+      - 192.0.0.10/32
+      - 192.0.0.170/32
+      - 192.0.0.171/32
+      - 192.0.0.8/32
+      - 192.0.0.9/32
+      - 192.0.2.0/24
+      - 192.168.0.0/16
+      - 192.175.48.0/24
+      - 192.31.196.0/24
+      - 192.52.193.0/24
+      - 192.88.99.0/24
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 224.0.0.0/4
+      - 240.0.0.0/4
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'
+      - 0.0.0.0
+  Selection_8:
+    process.executable|contains:
+      - /tmp/newroot/*
+      - /tmp/snap.rootfs*

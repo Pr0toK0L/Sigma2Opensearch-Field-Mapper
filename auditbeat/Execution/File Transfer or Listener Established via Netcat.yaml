@@ -1,0 +1,64 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: File Transfer or Listener Established via Netcat
+description: >-
+  A netcat process is engaging in network activity on a Linux host. Netcat is
+  often used as a persistence mechanism by exporting a reverse shell or by
+  serving a shell on a listening port. Netcat is also sometimes used for data
+  exfiltration.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.t1059
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection1 and (filter1 or filter2 or filter3 or filter4) or
+    selection2
+  selection1:
+    host.os.type|all:
+      - linux
+    event.type|contains:
+      - start
+    process.name|contains:
+      - nc
+      - ncat
+      - netcat
+      - netcat.openbsd
+      - netcat.traditional
+  filter1:
+    process.args|contains:
+      - '-l'
+      - '-p'
+      - '-c'
+      - echo
+      - '$*'
+  filter2:
+    process.args|contains:
+      - '-e'
+      - /bin/bash
+      - /bin/sh
+  filter3:
+    process.args|contains:
+      - '>'
+      - '<'
+  filter4:
+    process.args|contains:
+      - '|'
+      - nc
+      - ncat
+  selection2:
+    host.os.type|all:
+      - linux
+    process.name|contains:
+      - nc
+      - ncat
+      - netcat
+      - netcat.openbsd
+      - netcat.traditional

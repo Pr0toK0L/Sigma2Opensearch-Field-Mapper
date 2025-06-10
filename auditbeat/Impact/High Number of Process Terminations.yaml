@@ -1,0 +1,29 @@
+id: ""
+logsource:
+  product: linux
+title: High Number of Process Terminations
+description: >-
+  This rule identifies a high number (10) of process terminations via pkill from
+  the same host within a short time period.
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1489
+falsepositives:
+  - >-
+    This activity is unlikely to happen legitimately. Benign true positives
+    (B-TPs) can be added as exceptions if necessary. 
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1489/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+  Selection_4:
+    process.name|all:
+      - pkill
+  Selection_5:
+    process.args|all:
+      - '-f'

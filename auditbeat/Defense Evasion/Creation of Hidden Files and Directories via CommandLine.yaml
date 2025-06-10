@@ -1,0 +1,47 @@
+id: ''
+logsource:
+  product: linux
+title: Creation HiddenFiles and Directories via Cmd
+description: >-
+  Users can mark specific files as hidden simply by putting a dot as the first
+  character in the file or folder name. Adversaries can use this to their
+  advantage to hide files and folders on the system for persistence and defense
+  evasion. This rule looks for hidden files or folders in common writable
+  directories.
+tags:
+  - attack.defense_evasion
+  - attack.t1564
+  - attack.TA0005
+  - attack.TA0003
+falsepositives:
+  - >-
+    Certain tools may create hidden temporary files or directories upon
+    installation or as part of their normal behavior. These events can be
+    filtered by the process arguments, username, or process name values.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action:
+      - executed
+    process.working_directory|contains:
+      - /tmp
+      - /var/tmp
+      - /dev/shm
+    process.args|all:
+      - '\.[a-z0-9_\-][a-z0-9_\-\.]{1,254}'
+  Selection_2:
+    process.name|contains:
+      - ls
+      - find
+      - grep
+      - git
+      - jq
+      - basename

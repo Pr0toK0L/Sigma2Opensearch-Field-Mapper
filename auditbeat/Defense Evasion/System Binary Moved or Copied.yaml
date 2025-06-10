@@ -1,0 +1,61 @@
+id: ''
+logsource:
+  product: linux
+title: System Binary Moved or Copied
+description: >-
+  This rule monitors for the copying or moving of a system binary. Adversaries
+  may copy/move and rename system binaries to evade detection. Copying a system
+  binary to a different location should not occur often, so if it does, the
+  activity should be investigated
+tags:
+  - attack.defense_evasion
+  - attack.t1036
+  - attack.t1564
+  - attack.TA0005
+falsepositives:
+  - Legitimate administrative actions
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - change
+    file.path|contains:
+      - /bin/*
+      - /usr/bin/*
+      - /usr/local/bin/*
+      - /sbin/*
+      - /usr/sbin/*
+      - /usr/local/sbin/*
+  filter:
+    process.executable|contains:
+      - /nix/store/*
+      - /var/lib/dpkg/*
+      - /tmp/vmis.*
+      - /snap/*
+      - /dev/fd/*
+      - 'null'
+    file.path|contains:
+      - /bin/*.tmp
+      - /usr/bin/*.tmp
+      - /usr/local/bin/*.tmp
+      - /sbin/*.tmp
+      - /usr/sbin/*.tmp
+      - /usr/local/sbin/*.tmp
+    file.extension|contains:
+      - swp
+      - swpx
+      - swx
+      - dpkg-remove
+      - dpkg-new
+    process.name|contains:
+      - sed
+      - perl
+    file.name|contains:
+      - sed*
+      - e2scrub_all.tmp*

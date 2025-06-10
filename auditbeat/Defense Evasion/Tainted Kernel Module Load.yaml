@@ -1,0 +1,31 @@
+id: ''
+logsource:
+  product: linux
+title: Tainted Kernel Module Load
+description: >-
+  Monitors syslog for messages indicating instances of a tainted kernel module
+  load, which could indicate the presence of a rootkit or unauthorized module.
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.t1547
+  - attack.t1014
+  - attack.t1547.006
+falsepositives:
+  - Legitimate kernel module operations during system updates or installations.
+level: low
+status: experimental
+references:
+  - 'https://example.com/reference-to-rule'
+author: hoang.nguyen
+detection:
+  condition: query
+  query:
+    host.os.type|all:
+      - linux
+    process.name|all:
+      - kernel
+    message|contains:
+      - >-
+        module verification failed: signature and/or required key missing -
+        tainting kernel

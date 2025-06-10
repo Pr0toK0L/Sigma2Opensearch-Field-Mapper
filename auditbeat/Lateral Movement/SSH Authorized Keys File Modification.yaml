@@ -1,0 +1,65 @@
+id: ""
+logsource:
+  product: linux
+title: SSH Authorized Keys File Modification
+description: >-
+  The Secure Shell (SSH) authorized_keys file specifies which users are allowed
+  to log into a server using public key authentication.
+tags:
+  - attack.Persistence
+  - attack.TA0003
+  - attack.T1098
+  - attack.T1098.004
+  - attack.Lateral_Movement
+  - attack.TA0008
+  - attack.T1021
+  - attack.SSH
+  - attack.T1021.004
+  - attack.T1563
+  - attack.SSH_Hijacking
+  - attack.T1563.001
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0003/'
+  - 'https://attack.mitre.org/techniques/T1098/'
+  - 'https://attack.mitre.org/techniques/T1098/004/'
+  - 'https://attack.mitre.org/tactics/TA0008/'
+  - 'https://attack.mitre.org/techniques/T1021/'
+  - 'https://attack.mitre.org/techniques/T1021/004/'
+  - 'https://attack.mitre.org/techniques/T1563/'
+  - 'https://attack.mitre.org/techniques/T1563/001/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and not Selection_4
+  Selection_1:
+    event.category|all:
+      - file
+  Selection_2:
+    event.type|contains:
+      - change
+      - creation
+  Selection_3:
+    file.name|contains:
+      - authorized_keys
+      - authorized_keys2
+      - /etc/ssh/sshd_config
+      - /root/.ssh
+  Selection_4:
+    process.executable|contains:
+      - /Library/Developer/CommandLineTools/usr/bin/git
+      - /usr/local/Cellar/maven/*/libexec/bin/mvn
+      - /Library/Java/JavaVirtualMachines/jdk*.jdk/Contents/Home/bin/java
+      - /usr/bin/vim
+      - /usr/local/Cellar/coreutils/*/bin/gcat
+      - /usr/bin/bsdtar
+      - /usr/bin/nautilus
+      - /usr/bin/scp
+      - /usr/bin/touch
+      - /var/lib/docker/*
+      - /usr/bin/google_guest_agent
+      - /opt/jc/bin/jumpcloud-agent
+      - /opt/puppetlabs/puppet/bin/puppet
+      - /usr/bin/chef-client

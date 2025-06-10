@@ -1,0 +1,37 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Process Started from Process ID PID File
+description: >-
+  Identifies a new process starting from a process ID (PID), lock or reboot file
+  within the temporary file storage paradigm (tmpfs) directory /var/run directory.
+  On Linux, the PID files typically hold the process ID to track previous copies
+  running and manage other tasks. Certain Linux malware use the /var/run directory
+  for holding data, executables and other tasks, disguising itself or these files
+  as legitimate PID files.
+tags:
+  - attack.auditbeat
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+falsepositives:
+  - >-
+    False-Positives (FP) should be at a minimum with this detection as PID files
+    are meant to hold process IDs, not inherently be executables that spawn
+    processes.
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type: linux
+    event.type: start
+    user.id: "0"
+    process.executable|contains:
+      - '/var/run/'
+      - '+w'
+      - pid
+      - lock
+      - reboot

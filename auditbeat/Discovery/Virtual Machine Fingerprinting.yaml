@@ -1,0 +1,43 @@
+id: ""
+logsource:
+  product: linux
+title: Virtual Machine Fingerprinting
+description: >-
+  An adversary may attempt to get detailed information about the operating
+  system and hardware.
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1082
+  - attack.auditbeat
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1082/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    event.category|contains:
+      - process
+  Selection_2:
+    host.os.type|all:
+      - linux
+  Selection_3:
+    event.type|contains:
+      - start
+      - process_started
+  Selection_4:
+    process.args|contains:
+      - /sys/class/dmi/id/bios_version
+      - /sys/class/dmi/id/product_name
+      - /sys/class/dmi/id/chassis_vendor
+      - /proc/scsi/scsi
+      - /proc/ide/hd0/model
+  Selection_5:
+    user.name|all:
+      - root

@@ -1,0 +1,52 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Successful SSH Brute Force Attack
+description: >-
+  Identifies multiple SSH login failures followed by a successful one from the
+  same source address.
+tags:
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.Brute_Force
+  - attack.T1110
+  - attack.T1110.001g
+  - attack.T1110.003
+  - attack.auditbeat
+  - attack.filebeat
+falsepositives:
+  - Authentication misconfiguration or obsolete credentials.
+  - Service account password expired.
+  - Infrastructure or availability issue.
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1110/'
+  - 'https://attack.mitre.org/techniques/T1110/001/'
+  - 'https://attack.mitre.org/techniques/T1110/003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and not Selection_4 and not
+    Selection_5
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.action|contains:
+      - ssh_login
+      - user_login
+      - login
+      - executed
+      - connected-to
+  Selection_3:
+    event.outcome|all:
+      - failure
+  Selection_4:
+    source.ip|all:
+      - 'null'
+  Selection_5:
+    source.ip|contains:
+      - 0.0.0.0
+      - '::'

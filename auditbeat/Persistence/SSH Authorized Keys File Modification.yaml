@@ -1,0 +1,55 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: SSH Authorized Keys File Modification
+description: >-
+  The Secure Shell (SSH) authorized_keys file specifies which users are allowed
+  to log into a server using public key authentication. Adversaries may modify
+  it to maintain persistence on a victim host by adding their own public key(s).
+tags:
+  - attack.lateral_movement
+  - attack.persistence
+  - attack.TA0003
+  - attack.TA0008
+  - attack.t1098
+  - attack.t1021
+  - attack.t1563
+  - attack.t1098.004
+  - attack.t1021.004
+  - attack.t1563.001
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter1
+  selection:
+    event.category|all:
+      - file
+    event.type|contains:
+      - change
+      - creation
+      - create
+    file.name|contains:
+      - authorized_keys
+      - authorized_keys2
+      - /etc/ssh/sshd_config
+      - /root/.ssh
+  filter1:
+    process.executable|contains:
+      - /Library/Developer/CommandLineTools/usr/bin/git
+      - /usr/local/Cellar/maven/*/libexec/bin/mvn
+      - /Library/Java/JavaVirtualMachines/jdk*.jdk/Contents/Home/bin/java
+      - /usr/bin/vim
+      - /usr/local/Cellar/coreutils/*/bin/gcat
+      - /usr/bin/bsdtar
+      - /usr/bin/nautilus
+      - /usr/bin/scp
+      - /usr/bin/touch
+      - /var/lib/docker/*
+      - /usr/bin/google_guest_agent
+      - /opt/jc/bin/jumpcloud-agent
+      - /opt/puppetlabs/puppet/bin/puppet
+      - /usr/bin/chef-client

@@ -1,0 +1,50 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious APT Package Manager Network Connection
+description: >-
+  Detects suspicious network events executed by the APT package manager,
+  potentially indicating persistence through an APT backdoor.
+tags:
+  - attack.Persistence
+  - attack.TA0003 
+  - attack.T1543
+  - attack.T1574
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.Defense_Evasion
+  - attack.TA0005
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0003/'
+  - 'https://attack.mitre.org/techniques/T1543/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/tactics/TA0005/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.parent.name|contains:
+      - apt
+    process.args|contains:
+      - '-c'
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish

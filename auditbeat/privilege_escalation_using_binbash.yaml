@@ -1,0 +1,22 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Execution of bin bash for privilege escalation
+description: >-
+  Detects the execution of /usr/bin/bash with the -p option, which preserves
+  SUID/SGID privileges and can be used for privilege escalation.
+tags: []
+falsepositives:
+  - Legitimate administrative use of bash with the -p option
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    file.path:
+      - /usr/bin/bash
+    process.args|contains|all:
+      - '-p'
+      - /bin/bash

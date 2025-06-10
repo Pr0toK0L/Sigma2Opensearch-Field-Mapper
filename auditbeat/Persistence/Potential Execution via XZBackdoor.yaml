@@ -1,0 +1,69 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Execution via XZBackdoor
+description: >-
+  It identifies potential malicious shell executions through remote SSH and
+  detects cases where the sshd service suddenly terminates soon after successful
+  execution, suggesting suspicious behavior similar to the XZ backdoor.
+tags:
+  - attack.credential_access
+  - attack.persistence
+  - attack.lateral_movement
+  - attack.TA0003
+  - attack.T1543
+  - attack.TA0006
+  - attack.T1556
+  - attack.TA0008
+  - attack.T1021
+  - attack.T1563
+  - attack.T1563.001
+  - attack.T1021.004
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+  - 'https://attack.mitre.org/techniques/T1556/'
+  - 'https://attack.mitre.org/techniques/T1021/'
+  - 'https://attack.mitre.org/techniques/T1563/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection_1 and (selection_2 and not selection2_1) and selection_3 and
+    selection_4
+  selection_1:
+    process.name:
+      - sshd
+    process.args|contains:
+      - '-D'
+      - '-R'
+  selection_2:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name:
+      - sshd
+  selection_3:
+    host.os.type:
+      - linux
+    event.action:
+      - end
+    process.name:
+      - sshd
+  selection_4:
+    host.os.type:
+      - linux
+    event.type:
+      - end
+    event.action:
+      - disconnect_received
+    process.name:
+      - sshd
+  selection2_1:
+    process.executable|all:
+      - /usr/sbin/sshd

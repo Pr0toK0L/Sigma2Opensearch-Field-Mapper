@@ -1,0 +1,76 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Privilege Escalation via CAP_CHOWN CAP_FOWNER
+description: >-
+  Identifies instances where a processes (granted CAP_CHOWN and/or CAP_FOWNER
+  capabilities) is executed, after which the ownership of a suspicious file or
+  binary is changed. In Linux, the CAP_CHOWN capability allows a process to
+  change the owner of a file, while CAP_FOWNER permits it to bypass permission
+  checks on operations that require file ownership (like reading, writing, and
+  executing).
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and not Selection_4 and
+    Selection_5 and Selection_6 and not Selection_7) or (Selection_8 and
+    Selection_9 and Selection_10 and Selection_11 and Selection_12 and not
+    Selection_13)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - 'null'
+  Selection_5:
+    process.thread.capabilities.effective|contains:
+      - CAP_CHOWN
+      - CAP_FOWNER
+  Selection_6:
+    process.command_line|contains:
+      - sudoers
+      - passwd
+      - shadow
+      - /root/
+  Selection_7:
+    user.id|all:
+      - '0'
+  Selection_8:
+    host.os.type|all:
+      - linux
+  Selection_9:
+    event.action|all:
+      - changed-file-ownership-of
+  Selection_10:
+    event.type|all:
+      - change
+  Selection_11:
+    event.outcome|all:
+      - success
+  Selection_12:
+    file.path|contains:
+      - /etc/passwd
+      - /etc/shadow
+      - /etc/sudoers
+      - /root/.ssh/*
+  Selection_13:
+    user.id|all:
+      - '0'

@@ -1,0 +1,42 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Suspicious APT Package Manager Network Connection
+description: >-
+  Detects suspicious network events executed by the APT package manager,
+  potentially indicating persistence through an APT backdoor. In Linux, APT
+  (Advanced Package Tool) is a command-line utility used for handling packages
+  on Debian-based systems, providing functions for installing, updating,
+  upgrading, and removing software along with managing package repositories.
+  Attackers can backdoor APT to gain persistence by injecting malicious code
+  into scripts that APT runs, thereby ensuring continued unauthorized access or
+  control each time APT is used for package management.
+tags:
+  - attack.persistence
+  - attack.command_and_control
+  - attack.defense_evasion
+  - attack.TA0003
+  - attack.TA0011
+  - attack.TA0005
+  - attack.t1543
+  - attack.t1574
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: filter1 and filter2
+  filter1:
+    event.type|all:
+      - start
+    host.os.type|all:
+      - linux
+    event.action|contains:
+      - exec
+      - executed
+      - connected-to
+    process.name|contains:
+      - apt
+    process.args|contains:
+      - '-c'

@@ -1,0 +1,48 @@
+id: ''
+logsource:
+  product: linux
+title: Suspicious Process Started via tmux or screen
+description: >-
+  Monitors for the execution of suspicious commands via screen and tmux.
+  Attackers may leverage these tools to execute commands while attempting to
+  evade detection by detaching processes directly.
+tags:
+  - attack.defense_evasion
+  - attack.T1218
+  - attack.TA0005
+falsepositives:
+  - Legitimate administrative or development activities.
+level: low
+status: experimental
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name|contains:
+      - nmap
+      - nc
+      - ncat
+      - netcat
+      - socat
+      - nc.openbsd
+      - ngrok
+      - ping
+      - java
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - telnet
+      - awk
+      - wget
+      - curl
+      - id

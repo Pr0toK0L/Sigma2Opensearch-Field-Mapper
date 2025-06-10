@@ -1,0 +1,39 @@
+id: e3f4d5c6-7b8a-4c9d-8e1f-f3e4d5c67b8a
+logsource:
+  product: linux
+title: Timestomping using Touch Command
+description: >-
+  Timestomping is an anti-forensics technique which is used to modify the
+  timestamps of a file, often to mimic files that are in the same folder.
+tags:
+  - attack.defense_evasion
+  - attack.t1070
+  - attack.TA0005
+falsepositives:
+  - Legitimate administrative actions or maintenance tasks
+level: medium
+status: experimental
+author: hoang.nguyen
+detection:
+  condition: selection and not selection_2
+  selection:
+    event.type:
+      - start
+    process.name:
+      - touch
+    process.args|contains:
+      - '-r'
+      - '-t'
+      - '-a*'
+      - '-m*'
+  selection_2:
+    user.id|all:
+      - '0'
+    process.args|contains:
+      - /usr/lib/go-*/bin/go
+      - /usr/lib/dracut/dracut-functions.sh
+      - /tmp/KSInstallAction.*/m/.patch/*
+    process.name|contains:
+      - pmlogger_daily
+      - pmlogger_janitor
+      - systemd

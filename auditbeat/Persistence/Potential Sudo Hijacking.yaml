@@ -1,0 +1,98 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Sudo Hijacking
+description: >
+  Identifies the creation of a sudo binary located at /usr/bin/sudo. Attackers
+  may hijack the default sudo binary and replace it with a custom binary or
+  script that can read the users password in clear text to escalate privileges
+  or enable persistence onto the system every time the sudo binary is executed.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.privilege_escalation
+  - attack.TA0004
+  - attack.1574
+  - attack.1548
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection and not (filter1 or filter2 or filter3 or filter4 or filter5 or
+    filter6)
+  selection:
+    host.os.type:
+      - linux
+    event.action|contains:
+      - creation
+      - rename
+      - create
+    file.path|contains:
+      - /usr/bin/sudo
+      - /bin/sudo
+  filter1:
+    file.path|contains:
+      - /usr/bin/sudo
+      - /bin/sudo
+  filter2:
+    process.executable|contains:
+      - /bin/dpkg
+      - /usr/bin/dpkg
+      - /bin/dockerd
+      - /usr/bin/dockerd
+      - /usr/sbin/dockerd
+      - /bin/microdnf
+      - /bin/rpm
+      - /usr/bin/rpm
+      - /bin/snapd
+      - /usr/bin/snapd
+      - /bin/yum
+      - /usr/bin/yum
+      - /bin/dnf
+      - /usr/bin/dnf
+      - /bin/podman
+      - /usr/bin/podman
+      - /bin/dnf-automatic
+      - /usr/bin/dnf-automatic
+      - /bin/pacman
+      - /usr/bin/pacman
+      - /usr/bin/dpkg-divert
+      - /bin/dpkg-divert
+      - /sbin/apk
+      - /usr/sbin/apk
+      - /usr/local/sbin/apk
+      - /usr/bin/apt
+      - /usr/sbin/pacman
+      - /usr/bin/microdnf
+      - /usr/local/bin/dockerd
+      - /usr/local/bin/podman
+      - /usr/local/bin/dnf
+      - /kaniko/executor
+      - /proc/self/exe
+      - /usr/bin/apt-get
+      - /usr/bin/apt-cache
+      - /usr/bin/apt-mark
+  filter3:
+    file.extension:
+      - dpkg-new
+  filter4:
+    process.executable|contains:
+      - /nix/store/*
+      - /var/lib/dpkg/*
+      - /tmp/vmis*
+      - /snap/*
+      - /dev/fd/*
+      - /var/lib/docker/*
+  filter5:
+    process.executable:
+      - 'null'
+  filter6:
+    process.name:
+      - sed
+    file.name:
+      - sed*

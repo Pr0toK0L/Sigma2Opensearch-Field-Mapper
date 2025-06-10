@@ -1,0 +1,24 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+  service: auditbeat
+title: Potential Xterm Reverse Shell
+description: Detects usage of _xterm_ as a potential reverse shell tunnel
+tags:
+  - attack.execution
+  - attack.t1059
+falsepositives:
+  - Unknown
+level: medium
+status: experimental
+references:
+  - 'https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet'
+  - 'https://www.revshells.com/'
+author: hoang.nguyen
+detection:
+  selection:
+    process.name: xterm
+    process.args:
+      - "*-display*"
+      - "*:1*"
+  condition: selection

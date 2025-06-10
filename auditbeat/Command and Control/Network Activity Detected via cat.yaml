@@ -1,0 +1,84 @@
+id: ""
+logsource:
+  product: linux
+title: Network Activity Detected via cat
+description: >-
+  This rule monitors for the execution of the cat command, followed by a
+  connection attempt by the same process.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.Defense_Evasion
+  - attack.TA0005
+  - attack.Exfiltration
+  - attack.TA0010
+  - attack.auditbeat
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions. 
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need.
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/tactics/TA0005/'
+  - 'https://attack.mitre.org/tactics/TA0010/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4) or
+    (Selection_1 and Selection_6 and Selection_4 and not Selection_7)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - cat
+  Selection_6:
+    event.action|contains:
+      - connection_attempted
+      - disconnect_received
+      - connected-to
+  Selection_7:
+    destination.ip|contains:
+      - 'null'
+      - 0.0.0.0
+      - 10.0.0.0/8
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.0.0/29
+      - 192.0.0.8/32
+      - 192.0.0.9/32
+      - 192.0.0.10/32
+      - 192.0.0.170/32
+      - 192.0.0.171/32
+      - 192.0.2.0/24
+      - 192.31.196.0/24
+      - 192.52.193.0/24
+      - 192.168.0.0/16
+      - 192.88.99.0/24
+      - 224.0.0.0/4
+      - 100.64.0.0/10
+      - 192.175.48.0/24
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 240.0.0.0/4
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'

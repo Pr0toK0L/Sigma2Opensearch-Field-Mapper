@@ -1,0 +1,29 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Processes with Trailing Spaces
+description: >-
+  Identify instances where adversaries include trailing space characters to
+  mimic regular files, disguising their activity to evade default file handling
+  mechanisms.
+tags:
+  - attack.defense_evasion
+  - attack.TA0005
+  - attack.t1036
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+    process.name|contains:
+      - '* '

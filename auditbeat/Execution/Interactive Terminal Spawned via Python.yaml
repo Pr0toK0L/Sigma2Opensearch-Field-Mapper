@@ -1,0 +1,58 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Interactive Terminal Spawned via Python
+description: >-
+  Identifies when a terminal (tty) is spawned via Python. Attackers may upgrade
+  a   simple reverse shell to a fully interactive tty after obtaining initial
+  access   to a host.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.t1059
+  - attack.t1059.006
+falsepositives: []
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and (filter1 or filter2)
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|contains:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  filter1:
+    process.name|contains:
+      - python*
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+    process.args|contains:
+      - '*pty.spawn*'
+      - '-c'
+  filter2:
+    process.name|contains:
+      - python*
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+    process.args:
+      - '*sh'

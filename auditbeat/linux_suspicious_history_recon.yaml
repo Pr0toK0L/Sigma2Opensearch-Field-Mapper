@@ -1,0 +1,26 @@
+title: Print History File Contents
+id: d7821ff1-4527-4e33-9f84-d0d57fa2fb66
+status: experimental
+description: Detects events in which someone prints the contents of history files to the commandline or redirects it to a file for reconnaissance
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.003/T1552.003.md
+author: hoang.nguyen
+tags:
+    - attack.reconnaissance
+    - attack.t1592.004
+logsource:
+    product: linux
+detection:
+    selection:
+        process.executable|endswith:
+            - '/cat'
+            - '/head'
+            - '/tail'
+            - '/more'
+        process.args|contains:
+            - '.bash_history'
+            - '.zsh_history'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium

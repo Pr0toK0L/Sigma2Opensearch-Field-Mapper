@@ -1,0 +1,52 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Persistence Through Run Control Detected
+description: >-
+  This rule monitors the creation/alteration of the rc.local file by a
+  previously unknown process executable through the use of the new terms rule
+  type. The /etc/rc.local file is used to start custom applications, services,
+  scripts or commands during start-up. The rc.local file has mostly been
+  replaced by Systemd. However, through the systemd-rc-local-generator, rc.local
+  files can be converted to services that run at boot. Adversaries may alter
+  rc.local to execute malicious code at start-up, and gain persistence onto the
+  system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1037
+  - attack.t1037.004
+falsepositives:
+  - Legitimate use of rc.local by system administrators or automated tools
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter1 and not filter2
+  selection:
+    host.os.type:
+      - linux
+    event.category:
+      - file
+    event.type|contains:
+      - change
+      - file_modify_event
+      - creation
+      - file_create_event
+      - create
+    file.path:
+      - /etc/rc.local
+  filter1:
+    process.name|contains:
+      - dockerd
+      - docker
+      - dnf
+      - dnf-automatic
+      - yum
+      - rpm
+      - dpkg
+  filter2:
+    file.extension|contains:
+      - swp
+      - swpx

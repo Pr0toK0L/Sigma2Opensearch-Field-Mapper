@@ -1,0 +1,29 @@
+id: 9f1c4ca3-44b5-481d-ba42-32dc215a2769
+logsource:
+  product: linux
+title: Potential Protocol Tunneling via EarthWorm
+description: >-
+  Identifies the execution of the EarthWorm tunneler. Adversaries may tunnel
+  network communications to and from a victim system within a separate protocol
+  to avoid detection and network filtering, or to enable access to otherwise
+  unreachable systems.
+tags:
+  - attack.command_and_control
+  - attack.t1572
+falsepositives:
+  - New software installations
+  - System administrators or developers using port tunneling for benign purposes
+level: medium
+status: test
+references:
+  - 'http://rootkiter.com/EarthWorm/'
+  - >-
+    https://decoded.avast.io/luigicamastra/apt-group-targeting-governmental-agencies-in-east-asia/
+author: hoang.nguyen
+detection:
+  selection:
+    process.args:
+      - '-s'
+      - '-d'
+      - rssocks
+  condition: selection

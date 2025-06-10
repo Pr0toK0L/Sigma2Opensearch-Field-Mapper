@@ -1,0 +1,102 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Remote Code Execution via Web Server
+description: >-
+  Identifies suspicious commands executed via a web server, which may suggest a
+  vulnerability and remote shell access. Attackers may exploit a vulnerability
+  in a web application to execute commands via a web server, or place a backdoor
+  file that can be abused to gain code execution as a mechanism for persistence.
+tags:
+  - attack.persistence
+  - attack.initial_access
+  - attack.TA0003
+  - attack.t1505
+  - attack.TA0001
+  - attack.t1190
+  - attack.t1505.003
+falsepositives:
+  - >-
+    Network monitoring or management products may have a web server component
+    that runs shell commands as part of normal behavior.
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and filter1 and filter2 and not filter3
+  selection:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  filter1:
+    process.executable|contains:
+      - /usr/sbin/nginx
+      - /usr/local/sbin/nginx
+      - /usr/sbin/apache
+      - /usr/local/sbin/apache
+      - /usr/sbin/apache2
+      - /usr/local/sbin/apache2
+      - /usr/sbin/php*
+      - /usr/local/sbin/php*
+      - /usr/sbin/lighttpd
+      - /usr/local/sbin/lighttpd
+      - /usr/sbin/hiawatha
+      - /usr/local/sbin/hiawatha
+      - /usr/local/bin/caddy
+      - /usr/local/lsws/bin/lswsctrl
+      - '*/bin/catalina.sh'
+  filter2:
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk
+      - socat
+    process.args|contains:
+      - whoami
+      - id
+      - uname
+      - cat
+      - hostname
+      - ip
+      - curl
+      - wget
+      - pwd
+      - ls
+      - cd
+      - python*
+      - php*
+      - perl
+      - ruby
+      - lua*
+      - openssl
+      - nc
+      - netcat
+      - ncat
+      - telnet
+      - awk
+      - socat
+  filter3:
+    process.name|all:
+      - phpquery

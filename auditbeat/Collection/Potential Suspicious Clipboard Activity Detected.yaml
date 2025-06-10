@@ -1,0 +1,45 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Suspicious Clipboard Activity Detected
+description: >-
+  This rule monitors for the usage of the most common clipboard utilities on
+  unix systems by an uncommon process group leader. Adversaries may collect data
+  stored in the clipboard from users copying information within or between
+  applications. 
+tags:
+  - attack.Collection
+  - attack.TA0009
+  - attack.Clipboard_Data
+  - attack.T1115
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0009/'
+  - 'https://attack.mitre.org/techniques/T1115/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+  Selection_1:
+    event.category|contains:
+      - process
+  Selection_2:
+    host.os.type|all:
+      - linux
+  Selection_3:
+    event.type|contains:
+      - start
+  Selection_4:
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+      - process_started
+  Selection_5:
+    process.args|contains:
+      - xclip
+      - xsel
+      - wl-clipboard
+      - clipman
+      - copyq

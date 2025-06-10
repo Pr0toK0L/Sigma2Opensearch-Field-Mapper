@@ -1,0 +1,58 @@
+id: ""
+logsource:
+  product: linux
+title: Hosts File Modified
+description: >-
+  The hosts file on endpoints is used to control manual IP address to hostname
+  resolutions. The hosts file is the first point of lookup for DNS hostname
+  resolution so if adversaries can modify the endpoint hosts file, they can
+  route traffic to malicious infrastructure. This rule detects modifications to
+  the hosts file on Microsoft Windows, Linux (Ubuntu or RHEL) and macOS
+  systems. 
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1565
+  - attack.T1565.001
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1565/'
+  - 'https://attack.mitre.org/techniques/T1565/001/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and not Selection_4) or (Selection_5 and
+    Selection_6 and Selection_7 and Selection_8)
+  Selection_1:
+    event.category|all:
+      - file
+  Selection_2:
+    event.type|contains:
+      - change
+      - creation
+  Selection_4:
+    process.name|contains:
+      - dockerd
+      - rootlesskit
+      - podman
+      - crio
+  Selection_5:
+    event.category|all:
+      - process
+  Selection_6:
+    event.type|all:
+      - start
+  Selection_7:
+    process.name|contains:
+      - nano
+      - vim
+      - vi
+      - emacs
+      - echo
+      - sed
+  Selection_8:
+    process.args|contains:
+      - /etc/hosts

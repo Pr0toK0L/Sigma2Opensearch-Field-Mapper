@@ -1,0 +1,40 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Protocol Tunneling via EarthWorm
+description: Identifies the execution of the EarthWorm tunneler.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1572
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions - preferably with a combination of user and
+    command line conditions.
+  - >-
+    If this activity is related to a system administrator or developer who uses
+    port tunneling for benign purposes, consider adding exceptions for specific
+    user accounts or hosts. 
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need. 
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1572/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|contains:
+      - start
+    process.args|contains:
+      - '-s'
+      - '-d'
+      - rssocks

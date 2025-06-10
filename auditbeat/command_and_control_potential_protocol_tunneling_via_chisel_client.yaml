@@ -1,0 +1,80 @@
+id: Mfzr4o8BZMUWnm7PdqYZ
+logsource:
+  product: linux
+title: Potential Protocol Tunneling via Chisel Client
+description: >-
+  This rule monitors for common command line flags leveraged by the Chisel
+  client utility followed by a connection attempt. Chisel is a command-line
+  utility used for creating and managing TCP and UDP tunnels, enabling port
+  forwarding and secure communication between machines. Attackers can abuse the
+  Chisel utility to establish covert communication channels, bypass network
+  restrictions, and carry out malicious activities by creating tunnels that
+  allow unauthorized access to internal systems.
+tags:
+  - attack.execution
+  - attack.t1572
+level: medium
+status: experimental
+references:
+  - >-
+    https://blog.bitsadmin.com/living-off-the-foreign-land-windows-as-offensive-platform
+  - >-
+    https://book.hacktricks.xyz/generic-methodologies-and-resources/tunneling-and-port-forwarding
+author: hoang.nguyen
+detection:
+  condition: selection and not network_selection
+  selection:
+    process.name:
+      - chisel
+    process.args:
+      - client
+      - '*R*'
+      - '*:*'
+      - '*socks*'
+      - '*.*'
+    process.args_count:
+      - '>=4'
+    process.parent.name:
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  network_selection:
+    event.action:
+      - connection_attempted
+    event.type:
+      - start
+    destination.ip:
+      - '127.0.0.1'
+      - ':1'
+    process.name:
+      - 'python*'
+      - 'php*'
+      - 'perl'
+      - 'ruby'
+      - 'lua*'
+      - 'openssl'
+      - 'nc'
+      - 'netcat'
+      - 'ncat'
+      - 'telnet'
+      - 'awk'
+      - 'java'
+      - 'ftp'
+      - 'socat'
+      - 'curl'
+      - 'wget'
+      - 'dpkg'
+      - 'docker'
+      - 'dockerd'
+      - 'yum'
+      - 'apt'
+      - 'rpm'
+      - 'dnf'
+      - 'ssh'
+      - 'sshd'

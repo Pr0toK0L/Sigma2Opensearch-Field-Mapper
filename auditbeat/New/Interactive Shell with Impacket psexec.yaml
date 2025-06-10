@@ -1,0 +1,19 @@
+title: Interactive Shell with Impacket psexec.py
+status: executable
+description: Detects the use executing a command on the remote host with Impacket psexec.py script.
+author: hoang.nguyen
+tags:
+    - attack.execution
+    - attack.t1021.002
+    - attack.t1569.002
+logsource:
+    product: linux
+detection:
+    selection: 
+      process.args|contains:
+         - 'impacket'
+         - 'psexec.py'
+      process.name|endswith:
+         - python3
+    condition: selection
+level: high

@@ -1,0 +1,44 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: File Made Executable via Chmod Inside A Container
+description: >-
+  This rule detects when chmod is used to add the execute permission to a file
+  inside a container. Modifying file permissions to make a file executable could
+  indicate malicious activity, as an attacker may attempt to run unauthorized or
+  malicious code inside the container.
+tags:
+  - attack.defense_evasion
+  - attack.execution
+  - attack.TA0005
+  - attack.TA0002
+  - attack.t1059
+  - attack.t1222
+  - attack.t1222.002
+falsepositives:
+  - Legitimate administrative actions or maintenance tasks
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not Selection_2
+  Selection_1:
+    event.type|contains:
+      - change
+      - creation
+      - create
+    process.name|all:
+      - chmod
+    process.args|all:
+      - chmod
+      - ''
+    process.args|contains:
+      - '*x*'
+      - '777'
+      - '755'
+      - '754'
+      - '700'
+  Selection_2:
+    process.args|contains:
+      - '-x'

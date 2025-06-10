@@ -1,0 +1,39 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: SSH Author Keys File Modified In Container
+description: >-
+  This rule detects the creation or modification of an authorized_keys or
+  sshd_config file inside a container. The Secure Shell (SSH) authorized_keys
+  file specifies which users are allowed to log into a server using public key
+  authentication. Adversaries may modify it to maintain persistence on a victim
+  host by adding their own public key(s). Unexpected and unauthorized SSH usage
+  inside a container can be an indicator of compromise and should be
+  investigated.
+tags:
+  - attack.lateral_movement
+  - attack.persistence
+  - attack.TA0003
+  - attack.TA0008
+  - attack.t1098
+  - attack.t1021
+  - attack.t1563
+  - attack.t1098.004
+  - attack.t1021.004
+  - attack.t1563.001
+falsepositives: []
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    event.type|contains:
+      - change
+      - creation
+      - create
+    file.name|contains:
+      - authorized_keys
+      - authorized_keys2
+      - sshd_config

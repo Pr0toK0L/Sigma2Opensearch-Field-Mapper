@@ -1,0 +1,54 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Reverse Shell Activity via Terminal
+description: >-
+  Identifies the execution of a shell process with suspicious arguments which
+  may be indicative of reverse shell activity.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.t1059
+  - attack.auditbeat
+falsepositives: []
+level: high
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1059/'
+author: hoang.nguyen
+detection:
+  condition: selection and not filter1 and not filter2
+  selection:
+    event.type|contains:
+      - start
+      - process_started
+    process.name|contains:
+      - sh
+      - bash
+      - zsh
+      - dash
+      - zmodload
+    process.args|contains:
+      - /dev/tcp/
+      - /dev/udp/
+      - zsh/net/tcp
+      - zsh/net/udp
+  filter1:
+    process.name:
+      - timeout
+    process.executable|contains:
+      - /var/lib/docker/overlay
+  filter2:
+    process.command_line|contains:
+      - /dev/tcp/sirh_db/
+      - /dev/tcp/remoteiot.com/
+      - /dev/tcp/elk.stag.one/
+      - /dev/tcp/kafka/
+      - /dev/tcp/$0/$1
+      - /dev/tcp/127.
+      - /dev/udp/127.
+      - /dev/tcp/localhost/
+      - /dev/tcp/itom-vault/
+    process.parent.command_line|contains:
+      - runc 
+      - init

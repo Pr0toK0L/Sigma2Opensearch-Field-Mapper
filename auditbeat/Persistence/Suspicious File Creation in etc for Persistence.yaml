@@ -1,0 +1,75 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Suspicious File Creation in etc for Persistence
+description: >-
+  Detects the manual creation of files in specific etc directories, via user
+  root, used by Linux malware to persist and elevate privileges on compromised
+  systems. File creation in these directories should not be entirely common and
+  could indicate a malicious binary or script installing persistence mechanisms
+  for long term access.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1037
+  - attack.t1543
+  - attack.t1574
+  - attack.t1053
+  - attack.t1548
+  - attack.t1543.003
+  - attack.t1574.006
+  - attack.t1543.002
+  - attack.t1037.004
+  - attack.t1548.003
+falsepositives:
+  - >-
+    Legitimate use of creating files in /etc directories by system
+    administrators or automated tools.
+level: medium
+status: experimental
+references: []
+author: hoan.nguyen
+detection:
+  condition: selection and not filter1
+  selection:
+    host.os.type|all:
+      - linux
+    event.type|contains:
+      - creation
+      - file_create_event
+      - create
+    user.id|all:
+      - '0'
+    file.path|contains:
+      - /etc/ld.so.conf.d/*
+      - /etc/cron.d/*
+      - /etc/sudoers.d/*
+      - /etc/rc.d/init.d/*
+      - /etc/systemd/system/*
+      - /usr/lib/systemd/system/*
+  filter1:
+    process.name|contains:
+      - chef-client
+      - ruby
+      - pacman
+      - packagekitd
+      - python*
+      - platform-python
+      - dpkg
+      - yum
+      - apt
+      - dnf
+      - rpm
+      - systemd
+      - snapd
+      - dnf-automatic
+      - yum-cron
+      - elastic-agent
+      - dnfdaemon-system
+      - dockerd
+      - executor
+      - rhn_check
+    file.extension|contains:
+      - swp
+      - swpx
+      - tmp

@@ -1,0 +1,35 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Linux Local Account Brute Force Detected
+description: >-
+  Identifies multiple consecutive login attempts executed by one process
+  targeting a local linux user account within a short time interval.
+tags:
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.T1110
+  - attack.T1110.001
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1110/'
+  - 'https://attack.mitre.org/techniques/T1110/001/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - su

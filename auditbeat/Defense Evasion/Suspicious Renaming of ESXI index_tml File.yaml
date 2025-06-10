@@ -1,0 +1,28 @@
+id: ''
+logsource:
+  product: linux
+title: Suspicious Renaming of ESXi indexHtml File
+description: >-
+  Identifies instances where the index_html file within the /usr/lib/vmware/
+  directory is renamed on a Linux system. This rule monitors for the rename
+  event action associated with this specific file and path, which could indicate
+  malicious activity.
+tags:
+  - attack.defense_evasion
+  - attack.T1036
+  - attack.TA0005
+falsepositives:
+  - Legitimate file operations during system maintenance or upgrades.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type:
+      - linux
+    process.args|endswith:
+      - index.html
+    process.working_directory|startswith:
+      - /usr/lib/vmware/*

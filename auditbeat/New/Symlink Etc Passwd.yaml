@@ -1,0 +1,23 @@
+title: Symlink Etc Passwd
+status: experimental
+description: Detects suspicious command lines that look as if they would create symbolic links to /etc/passwd
+references:
+    - https://www.qualys.com/2021/05/04/21nails/21nails.txt
+author: hoang.nguyen
+tags:
+    - attack.t1204.001
+    - attack.execution
+logsource:
+    product: linux
+detection:
+    selection:
+        process.args|contains:
+            - '-s'
+            - '-f'
+            - '/etc/passwd'
+        process.executable|endswith:
+            - ln
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

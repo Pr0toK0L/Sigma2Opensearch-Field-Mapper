@@ -1,0 +1,52 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Binary Executed from Shared Memory Directory
+description: >-
+  Identifies the execution of a binary by root in Linux shared memory
+  directories: (/dev/shm/, /run/shm/, /var/run/, /var/lock/). This activity is
+  considered highly abnormal and should be investigated. Threat actors have
+  placed executables used for persistence on high-uptime servers in these
+  directories as system backdoors.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+falsepositives:
+  - >-
+    Directories /dev/shm and /run/shm are temporary file storage directories in
+    Linux. They are intended to appear as a mounted file system but use virtual
+    memory instead of a persistent storage device and thus are used for mounting
+    file systems in legitimate purposes.
+level: high
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter
+  selection:
+    host.os.type:
+      - linux
+    event.type|contains:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+    user.id:
+      - '0'
+    process.executable|contains:
+      - /dev/shm/*
+      - /run/shm/*
+      - /var/run/*
+      - /var/lock/*
+  filter:
+    process.executable|contains:
+      - /var/run/docker/*
+      - /var/run/utsns/*
+      - /var/run/s6/*
+      - /var/run/cloudera-scm-agent/*
+      - /var/run/argo/argoexec
+    process.args|contains:
+      - /usr/bin/runc
+      - init

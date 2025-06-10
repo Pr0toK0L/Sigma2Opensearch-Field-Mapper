@@ -1,0 +1,87 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+  service: auditbeat
+title: Sus Sys Cmd Exe by Pre Unknown Executable
+description: >-
+  This rule monitors for the execution of several commonly used system commands executed by a previously unknown executable located in commonly abused directories. An alert from this rule can indicate the presence of potentially malicious activity, such as the execution of unauthorized or suspicious processes attempting to run malicious code. Detecting and investigating such behavior can help identify and mitigate potential security threats, protecting the system and its data from potential compromise.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+  - attack.t1059.004
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: elastic
+detection:
+  condition: selection and not filter
+  selection:
+    host.os.type: linux
+    event.category|contains: 
+      - process
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - fork
+      - fork_event
+      - executed
+    process.executable|contains:
+      - /bin/*
+      - /usr/bin/*
+      - /usr/share/*
+      - /tmp/*
+      - /var/tmp/*
+      - /dev/shm/*
+      - /etc/init.d/*
+      - /etc/rc*.d/*
+      - /etc/crontab
+      - /etc/cron.*/*
+      - /etc/update-motd.d/*
+      - /usr/lib/update-notifier/*
+      - /home/*/.*
+      - /boot/*
+      - /srv/*
+      - /run/*
+    process.args|contains:
+      - whoami
+      - id
+      - hostname
+      - uptime
+      - top
+      - ifconfig
+      - netstat
+      - route
+      - ps
+      - pwd
+      - ls
+  filter:
+    process.name|contains:
+      - sudo
+      - which
+      - whoami
+      - id
+      - hostname
+      - uptime
+      - top
+      - netstat
+      - ps
+      - pwd
+      - ls
+      - apt
+      - dpkg
+      - yum
+      - rpm
+      - dnf
+      - dockerd
+      - docker
+      - snapd
+      - snap
+    process.executable|contains:
+      - /bin/*
+      - /usr/bin/*
+      - /run/k3s/*
+      - /etc/network/*
+      - /opt/Elastic/*

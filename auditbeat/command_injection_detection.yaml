@@ -1,0 +1,36 @@
+id: RxB9VpUBVDPr0dkuwJds
+logsource:
+  product: linux
+title: Detect Command Injection Attempts
+description: >-
+  Detects HTTP requests that exhibit signs of command injection through
+  user-supplied input parameters.
+tags:
+  - attack.t1190
+falsepositives:
+  - Legitimate requests containing special characters in parameters.
+level: high
+status: experimental
+references:
+  - 'https://www.imperva.com/learn/application-security/command-injection/'
+author: hoang.nguyen
+detection:
+  condition: selection and not selection2
+  selection:
+    process.args|contains:
+      - '|'
+      - ;
+      - '&'
+      - $
+      - '`'
+      - '||'
+      - '&&'
+      - '>'
+      - <
+      - '>>'
+      - '<<'
+      - '${'
+  selection2:
+    process.args|contains:
+      - inet
+      - debian-sa1

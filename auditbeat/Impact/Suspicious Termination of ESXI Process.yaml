@@ -1,0 +1,30 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Termination of ESXI Process
+description: >-
+  Identifies instances where VMware processes are terminated on a Linux system
+  by a kill command
+tags:
+  - attack.Impact
+  - attack.TA0040
+  - attack.T1489
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0040/'
+  - 'https://attack.mitre.org/techniques/T1489/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|contains:
+      - end
+  Selection_3:
+    process.name|contains:
+      - vmware-vmx
+      - vmx

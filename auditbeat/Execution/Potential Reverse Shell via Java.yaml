@@ -1,0 +1,92 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Reverse Shell via Java
+description: >-
+  This detection rule identifies the execution of a Linux shell process from a
+  Java JAR application post an incoming network connection. This behavior may
+  indicate reverse shell activity via a Java application.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.command_and_control
+  - attack.TA0011
+  - attack.T1059
+  - attack.T1071
+  - attack.T1059.004
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: (Selection_1 and not filter1) and (Selection_2 and not filter2)
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.action|contains:
+      - connection_accepted
+      - connection_attempted
+      - connected-to
+    process.executable|contains:
+      - /usr/bin/java
+      - /bin/java
+      - /usr/lib/jvm/*
+      - /usr/java/*
+  filter1:
+    destination.ip|contains:
+      - 0.0.0.0
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.0.0.0/24
+      - 192.0.0.0/29
+      - 192.0.0.8/32
+      - 192.0.0.9/32
+      - 192.0.0.10/32
+      - 192.0.0.170/32
+      - 192.0.0.171/32
+      - 192.0.2.0/24
+      - 192.31.196.0/24
+      - 192.52.193.0/24
+      - 192.88.99.0/24
+      - 192.168.0.0/16
+      - 224.0.0.0/4
+      - 100.64.0.0/10
+      - 192.175.48.0/24
+      - 198.18.0.0/15
+      - 198.51.100.0/24
+      - 203.0.113.0/24
+      - 240.0.0.0/4
+      - '::1'
+      - 'FE80::/10'
+      - 'FF00::/8'
+  Selection_2:
+    host.os.type|all:
+      - linux
+    event.action|contains:
+      - exec
+      - executed
+    process.parent.executable|contains:
+      - /usr/bin/java
+      - /bin/java
+      - /usr/lib/jvm/*
+      - /usr/java/*
+    process.parent.args|contains:
+      - '-jar'
+    process.name|contains:
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  filter2:
+    process.parent.args|contains:
+      - /usr/share/java/jenkins.war
+      - /etc/remote-iot/services/remoteiot.jar
+      - /usr/lib64/NetExtender.jar
+      - /usr/lib/jenkins/jenkins.war

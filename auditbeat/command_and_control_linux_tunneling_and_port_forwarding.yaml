@@ -1,0 +1,89 @@
+id: exe25o8BMRnKjsTPDj52
+logsource:
+  product: linux
+title: Potential Linux Tunneling and or Port Forwarding
+description: >
+  This rule monitors for a set of Linux utilities that can be used for tunneling
+  and port forwarding. Attackers can leverage tunneling and port forwarding
+  techniques to bypass network defenses, establish hidden communication
+  channels, and gain unauthorized access to internal resources, facilitating
+  data exfiltration, lateral movement, and remote control.
+tags:
+  - attack.execution
+  - attack.t1572
+falsepositives:
+  - New benign software installation activity
+  - >-
+    System administrator or developer using tunneling/forwarding for benign
+    purposes
+level: medium
+status: experimental
+references:
+  - >-
+    https://blog.bitsadmin.com/living-off-the-foreign-land-windows-as-offensive-platform
+  - >-
+    https://book.hacktricks.xyz/generic-methodologies-and-resources/tunneling-and-port-forwarding
+author: hoang.nguyen
+detection:
+  condition: preselection and 1 of selection*
+  preselection:
+    process.name|contains:
+      - bash
+      - dash
+      - ash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  selection1:
+    process.name|contains:
+      - gost
+      - pivotnacci
+    process.args:
+      - '-L*'
+      - '-C*'
+      - '-R*'
+  selection2:
+    process.name|contains:
+      - ssh
+      - sshd
+    process.args|contains:
+      - '-R'
+      - '-L'
+      - '-D'
+      - '-w'
+    process.args:
+      - '!chmod'
+  selection3:
+    process.name|contains:
+      - sshuttle
+    process.args|contains:
+      - '-r'
+      - '--remote'
+      - '-l'
+      - '--listen'
+  selection4:
+    process.name:
+      - socat
+    process.args:
+      - 'TCP4-LISTEN:*'
+      - SOCKS*
+  selection5:
+    process.name:
+      - chisel
+    process.args|contains:
+      - client
+      - server
+  selection6:
+    process.name|contains:
+      - iodine
+      - iodined
+      - dnscat
+      - hans
+      - hans-ubuntu
+      - ptunnel-ng
+      - ssf
+      - 3proxy
+      - ngrok

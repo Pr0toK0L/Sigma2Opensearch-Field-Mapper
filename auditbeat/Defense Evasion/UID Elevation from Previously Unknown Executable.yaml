@@ -1,0 +1,78 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: UID Elevation from Previously Unknown Executable
+description: >-
+  Monitors for the elevation of regular user permissions to root permissions
+  through a previously unknown executable. Attackers may attempt to evade
+  detection by hijacking the execution flow and hooking certain
+  functions/syscalls through a rootkit in order to provide easy access to root
+  via a special modified command.
+tags:
+  - attack.persistence
+  - attack.defense_evasion
+  - attack.t1547
+  - attack.t1014
+falsepositives: []
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not Selection_2
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.category|all:
+      - process
+    event.action|all:
+      - uid_change
+    event.type|all:
+      - change
+    user.id|all:
+      - '0'
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+  Selection_2:
+    process.executable|contains:
+      - /bin/*
+      - /usr/bin/*
+      - /sbin/*
+      - /usr/sbin/*
+      - /snap/*
+      - /tmp/newroot/*
+      - /var/lib/docker/*
+      - /usr/local/*
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+      - sudo
+      - su
+      - apt
+      - apt-get
+      - aptitude
+      - squid
+      - snap
+      - fusermount
+      - pkexec
+      - umount
+      - master
+      - omsbaseline
+      - dzdo
+      - sandfly
+      - logrotate
+    process.args|all:
+      - /usr/bin/python*

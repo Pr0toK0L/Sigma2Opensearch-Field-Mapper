@@ -1,0 +1,45 @@
+title: Unix Shell Configuration Modification
+status: experimental
+description: Detect unix shell configuration modification. Adversaries may establish persistence through executing malicious commands triggered when a new shell is opened.
+references:
+    - https://objective-see.org/blog/blog_0x68.html
+    - https://www.glitch-cat.com/p/green-lambert-and-attack
+    - https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat
+author: hoang.nguyen
+tags:
+    - attack.persistence
+    - attack.t1546.004
+logsource:
+    product: linux
+detection:
+    selection:
+        process.executable|contains:
+            - '/etc/shells'
+            - '/etc/profile'
+            - '/etc/profile.d/*'
+            - '/etc/bash.bashrc'
+            - '/etc/bashrc'
+            - '/etc/zsh/zprofile'
+            - '/etc/zsh/zshrc'
+            - '/etc/zsh/zlogin'
+            - '/etc/zsh/zlogout'
+            - '/etc/csh.cshrc'
+            - '/etc/csh.login'
+            - '/root/.bashrc'
+            - '/root/.bash_profile'
+            - '/root/.profile'
+            - '/root/.zshrc'
+            - '/root/.zprofile'
+            - '/home/*/.bashrc'
+            - '/home/*/.zshrc'
+            - '/home/*/.bash_profile'
+            - '/home/*/.zprofile'
+            - '/home/*/.profile'
+            - '/home/*/.bash_login'
+            - '/home/*/.bash_logout'
+            - '/home/*/.zlogin'
+            - '/home/*/.zlogout'
+    condition: selection
+falsepositives:
+    - Admin or User activity are expected to generate some false positives
+level: medium

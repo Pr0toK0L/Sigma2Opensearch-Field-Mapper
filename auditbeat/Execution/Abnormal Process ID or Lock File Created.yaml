@@ -1,0 +1,94 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Abnormal Process ID or Lock File Created
+description: >-
+  Identifies the creation of a Process ID (PID), lock, or reboot file created in
+  temporary file storage paradigm (tmpfs) directory /var/run. On Linux, the PID
+  files typically hold the process ID to track previous copies running and
+  manage other tasks. Certain Linux malware use the /var/run directory for
+  holding data, executables, and other tasks, disguising itself or these files
+  as legitimate PID files.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1106
+falsepositives:
+  - >-
+    False positives can appear if the PID file is legitimate and holding a
+    process ID as intended. To differentiate, if the PID file is an executable
+    or larger than 10 bytes, it should be ruled suspicious.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: >-
+    selection1 and (selection2 or selection3) and not selection4 and not
+    selection5 
+  selection1:
+    host.os.type:
+      - linux
+    event.category:
+      - file
+    event.action|contains:
+      - creation
+      - file_create_event
+    user.id:
+      - '0'
+    file.extension|contains:
+      - pid
+      - lock
+      - reboot
+    file.path|contains:
+      - /var/run/*
+      - /run/*
+  selection2:
+    process.name|contains:
+      - bash
+      - dash
+      - sh
+      - tcsh
+      - csh
+      - zsh
+      - ksh
+      - fish
+      - ash
+      - touch
+      - nano
+      - vim
+      - vi
+      - editor
+      - mv
+      - cp
+  selection4:
+    process.name:
+      - go
+      - git
+      - containerd*
+      - snap-confine
+      - cron
+      - crond
+      - sshd
+      - unattended-upgrade
+      - vzctl
+      - ifup
+      - rpcbind
+      - runc
+      - gitlab-runner-helper
+      - elastic-agent
+      - metricbeat
+  selection5:
+    file.name|contains:
+      - jem
+      - pid
+  selection3:
+    process.executable|contains:
+      - ./*
+      - /tmp/*
+      - /var/tmp/*
+      - /dev/shm/*
+      - /var/run/*
+      - /boot/*
+      - /srv/*
+      - /run/*

@@ -1,0 +1,40 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Executable Masquerading as Kernel Process
+description: >-
+  Monitors for kernel processes with associated process executable fields that
+  are not empty. Unix kernel processes such as kthreadd and kworker typically do
+  not have process.executable fields associated to them. Attackers may attempt
+  to hide their malicious programs by masquerading as legitimate kernel
+  processes.
+tags:
+  - attack.defense_evasion
+  - attack.t1036
+  - attack.t1564
+  - attack.TA0005
+falsepositives:
+  - >-
+    Legitimate administrative or debugging activities may occasionally produce
+    such patterns. These can be exempted by username or process path.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not Selection_2
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+    process.name|contains:
+      - kworker
+      - kthread
+  Selection_2:
+    process.executable|all:
+      - 'null'

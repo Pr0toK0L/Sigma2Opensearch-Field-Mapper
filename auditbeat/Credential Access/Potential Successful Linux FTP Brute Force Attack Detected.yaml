@@ -1,0 +1,54 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Successful Linux FTP Brute Force Attack
+description: >-
+  An FTP (file transfer protocol) brute force attack is a method where an
+  attacker systematically tries different combinations of usernames and
+  passwords to gain unauthorized access to an FTP server
+tags:
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.Brute_Force
+  - attack.T1110
+  - attack.T1110.001
+  - attack.T1110.003
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1110/'
+  - 'https://attack.mitre.org/techniques/T1110/001/'
+  - 'https://attack.mitre.org/techniques/T1110/003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5 and not Selection_6) or (Selection_1 and Selection_2 and
+    Selection_3 and Selection_7 and not Selection_5 and not Selection_6)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.action|contains:
+      - authenticated
+      - authentication
+      - authenticate
+  Selection_3:
+    auditd.data.terminal|all:
+      - ftp
+  Selection_4:
+    event.outcome|all:
+      - failure
+  Selection_5:
+    auditd.data.addr|all:
+      - 'null'
+  Selection_6:
+    auditd.data.addr|contains:
+      - 0.0.0.0
+      - '::'
+  Selection_7:
+    event.outcome|all:
+      - success

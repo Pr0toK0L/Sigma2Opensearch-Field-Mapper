@@ -1,0 +1,40 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Creation of Kernel Module
+description: >-
+  Identifies activity related to loading kernel modules on Linux via creation of
+  new ko files in the LKM directory.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.T1547
+  - attack.t1547.006
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1547/'
+author: hoang.nguyen
+detection:
+  condition: selection and not filter
+  selection:
+    host.os.type:
+      - linux
+    event.type|contains:
+      - change
+      - creation
+      - create
+    file.path:
+      - /lib/modules/*
+    file.extension|contains:
+      - ko
+  filter:
+    process.name|contains:
+      - dpkg
+      - systemd
+      - falcon-sensor*
+      - dnf
+      - yum
+      - rpm
+      - cp

@@ -1,0 +1,26 @@
+title: Pluggable Authentication Module (PAM) Version Discovery
+status: experimental
+description: detects PAM version discovery activity on Linux systems. PAM version discovery can be an indication of an attacker attempting to backdoor the authentication process through malicious PAM modules
+references:
+    - https://www.group-ib.com/blog/pluggable-authentication-module/
+    - https://embracethered.com/blog/posts/2022/post-exploit-pam-ssh-password-grabbing/
+author: hoang.nguyen
+tags:
+    - attack.defense-evasion
+    - attack.t1556
+    - attack.t1543
+    - attack.t1082
+logsource:
+    product: linux
+detection:
+    selection:
+        process.executable|contains:
+            - dpkg
+            - rpm
+        process.args|contains:
+            - pam
+            - libpam-modules
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

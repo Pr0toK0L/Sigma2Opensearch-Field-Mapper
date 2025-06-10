@@ -1,0 +1,25 @@
+title: Systemd Service Creation
+status: experimental
+description: Detects a creation of systemd services which could be used by adversaries to execute malicious code.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md
+author: hoang.nguyen
+tags:
+    - attack.persistence
+    - attack.t1543.002
+logsource:
+    product: linux
+detection:
+    selection:
+        auditd.paths.nametype|contains: 
+            - 'CREATE'
+    name_1:
+        process.executable|startswith:
+            - '/usr/lib/systemd/system/'
+            - '/etc/systemd/system/'
+    name_2:
+        process.executable|contains: '/.config/systemd/user/'
+    condition: path and 1 of name_*
+falsepositives:
+    - Admin work like legit service installs.
+level: medium

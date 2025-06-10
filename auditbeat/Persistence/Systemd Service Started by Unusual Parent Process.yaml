@@ -1,0 +1,76 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Systemd Service Started by Unusual Parent Process
+description: >-
+  Systemctl is a process used in Linux systems to manage systemd processes
+  through service configuration files.  Malicious actors can leverage systemd
+  services to achieve persistence by creating or modifying service files to
+  execute  malicious commands or payloads during system startup. This allows
+  them to maintain unauthorized access, execute additional  malicious
+  activities, or evade detection.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1543
+  - attack.privilege_escalation
+  - attack.TA0004
+  - attack.t1543
+  - attack.t1543.002
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1543/'
+author: hoang.nguyen
+detection:
+  condition: selection and not (filter1 or filter2)
+  selection:
+    host.os.type:
+      - linux
+    event.category:
+      - process
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.executable:
+      - /usr/bin/systemctl
+    process.args|contains:
+      - enable
+      - reenable
+      - start
+  filter1:
+    process.parent.pid:
+      - 1
+  filter2:
+    process.executable|contains:
+      - /bin/adduser
+      - /bin/dnf
+      - /bin/dnf-automatic
+      - /bin/dockerd
+      - /bin/dpkg
+      - /bin/microdnf
+      - /bin/pacman
+      - /bin/podman
+      - /bin/rpm
+      - /bin/snapd
+      - /bin/sudo
+      - /bin/useradd
+      - /bin/yum
+      - /usr/bin/dnf
+      - /usr/bin/dnf-automatic
+      - /usr/bin/dockerd
+      - /usr/bin/dpkg
+      - /usr/bin/microdnf
+      - /usr/bin/pacman
+      - /usr/bin/podman
+      - /usr/bin/rpm
+      - /usr/bin/snapd
+      - /usr/bin/sudo
+      - /usr/bin/yum
+      - /usr/sbin/adduser
+      - /usr/sbin/invoke-rc.d
+      - /usr/sbin/useradd
+      - /var/lib/dpkg/*

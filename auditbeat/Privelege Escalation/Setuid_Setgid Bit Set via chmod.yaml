@@ -1,0 +1,68 @@
+id: ""
+logsource:
+  product: linux
+title: Setuid_Setgid Bit Set via chmod
+description: >-
+  An adversary may add the setuid or setgid bit to a file or directory in order
+  to run a file with the privileges of the owning user or group. An adversary
+  can take advantage of this to either do a shell escape or exploit a
+  vulnerability in an application with the setuid or setgid bit to get code
+  running in a different user context.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1548
+  - attack.T1548.001
+  - attack.Persistence
+  - attack.TA0003
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/001/'
+  - 'https://attack.mitre.org/tactics/TA0003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    event.category|all:
+      - process
+  Selection_2:
+    event.type|contains:
+      - start
+      - process_started
+      - started
+  Selection_3:
+    process.name|contains:
+      - chmod
+  Selection_4:
+    process.args|contains:
+      - +s
+      - u+s
+      - '/4[0-9]{3}/'
+      - g+s
+      - '/2[0-9]{3}/'
+  Selection_5:
+    process.args|contains:
+      - /.*\/Applications\/VirtualBox.app\/.+/
+      - /\/usr\/local\/lib\/python.+/
+      - /\/var\/folders\/.+\/FP.*nstallHelper/
+      - /\/Library\/Filesystems\/.+/
+      - /\/usr\/lib\/virtualbox\/.+/
+      - /\/Library\/Application.*/
+      - /run/postgresql
+      - /var/crash
+      - /var/run/postgresql
+      - /\/usr\/bin\/.+/
+      - /\/usr\/local\/share\/.+/
+      - /\/Applications\/.+/
+      - /\/usr\/libexec\/.+/
+      - /var/metrics
+      - /\/var\/lib\/dpkg\/.+/
+      - /\/run\/log\/journal\/.*/
+      - \/Users\/*\/.minikube\/bin\/docker-machine-driver-hyperkit

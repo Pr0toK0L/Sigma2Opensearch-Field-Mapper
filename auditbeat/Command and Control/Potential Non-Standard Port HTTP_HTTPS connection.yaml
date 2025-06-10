@@ -1,0 +1,57 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Non-Standard Port HTTP_HTTPS connection
+description: >-
+  Identifies potentially malicious processes communicating via a port paring
+  typically not associated with HTTP/HTTPS.
+tags:
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1071
+  - attack.T1071.001
+  - attack.T1571
+  - attack.T1573
+  - attack.T1573.001
+  - attack.T1573.002
+  - attack.auditbeat
+falsepositives:
+  - >-
+    If this activity is related to new benign software installation activity,
+    consider adding exceptions — preferably with a combination of user and
+    command line conditions. 
+  - >-
+    Try to understand the context of the execution by thinking about the user,
+    machine, or business purpose. A small number of endpoints, such as servers
+    with unique software, might appear unusual but satisfy a specific business
+    need. 
+level: low
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1071/'
+  - 'https://attack.mitre.org/techniques/T1071/001/'
+  - 'https://attack.mitre.org/techniques/T1571/'
+  - 'https://attack.mitre.org/techniques/T1573/'
+  - 'https://attack.mitre.org/techniques/T1573/001/'
+  - 'https://attack.mitre.org/techniques/T1573/002/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not Selection_2 and Selection_3 and not Selection_4
+  Selection_1:
+    process.name|contains:
+      - http
+      - https
+  Selection_2:
+    destination.port|contains:
+      - '80'
+      - '443'
+  Selection_3:
+    event.action|contains:
+      - connection_attempted
+      - ipv4_connection_attempt_event
+      - connection_accepted
+      - ipv4_connection_accept_event
+  Selection_4:
+    destination.ip|all:
+      - 127.0.0.1

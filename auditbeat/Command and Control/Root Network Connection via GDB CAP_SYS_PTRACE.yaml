@@ -1,0 +1,71 @@
+id: ""
+logsource:
+  product: linux
+title: Root Network Connection via GDB CAP_SYS_PTRACE
+description: >-
+  Identifies instances where GDB (granted the CAP_SYS_PTRACE capability) is
+  executed, after which an outbound network connection is initiated by UID/GID 0
+  (root). 
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1055
+  - attack.T1055.008
+  - attack.T1068
+  - attack.Execution
+  - attack.TA0002
+  - attack.T1059
+  - attack.T1059.004
+  - attack.Command_and_Control
+  - attack.TA0011
+  - attack.T1071
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1055/'
+  - 'https://attack.mitre.org/techniques/T1055/008/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+  - 'https://attack.mitre.org/tactics/TA0002/'
+  - 'https://attack.mitre.org/techniques/T1059/'
+  - 'https://attack.mitre.org/techniques/T1059/004/'
+  - 'https://attack.mitre.org/tactics/TA0011/'
+  - 'https://attack.mitre.org/techniques/T1071/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and (Selection_2 or Selection_3) and not Selection_4) or
+    (Selection_6 and not Selection_7)
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.name|all:
+      - gdb
+  Selection_2:
+    process.thread.capabilities.effective|all:
+      - CAP_SYS_PTRACE
+  Selection_3:
+    process.thread.capabilities.permitted|all:
+      - CAP_SYS_PTRACE
+  Selection_4:
+    user.id|all:
+      - '0'
+  Selection_6:
+    host.os.type|all:
+      - linux
+    event.action|all:
+      - connection_attempted
+    event.type|all:
+      - start
+    user.id|all:
+      - '0'
+  Selection_7:
+    process.name|all:
+      - 'null'

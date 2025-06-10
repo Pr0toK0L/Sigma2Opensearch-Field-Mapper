@@ -1,0 +1,46 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Netcat Listener Established via rlwrap
+description: >-
+  Monitors for the execution of a netcat listener via rlwrap. rlwrap is a
+  readline wrapper, a small utility that uses the GNU Readline library to allow
+  the editing of keyboard input for any command. This utility can be used in
+  conjunction with netcat to gain a more stable reverse shell.
+tags:
+  - attack.execution
+  - attack.TA0002
+  - attack.T1059
+  - attack.T1059.004
+falsepositives:
+  - >-
+    Netcat is a dual-use tool that can be used for benign or malicious activity.
+    Netcat is included in some Linux distributions so its presence is not
+    necessarily suspicious. Some normal use of this program, while uncommon, may
+    originate from scripts, automation tools, and frameworks.
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection1 and selection2 and selection3
+  selection1:
+    host.os.type:
+      - linux
+    event.type|contains:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+  selection2:
+    process.name|contains:
+      - rlwrap
+  selection3:
+    process.args|contains:
+      - nc
+      - ncat
+      - netcat
+      - nc.openbsd
+      - socat
+      - '-*l*'

@@ -1,0 +1,45 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Kworker UID Elevation
+description: >-
+  Monitors for the elevation of regular user permissions to root permissions
+  through the kworker process. kworker, or kernel worker, processes are part of
+  the kernel workqueue mechanism. They are responsible for executing work that
+  has been scheduled to be done in kernel space, which might include tasks like
+  handling interrupts, background activities, and other kernel-related tasks.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1574
+  - attack.T1574.013
+  - attack.Defense_Evasion
+  - attack.TA0005
+  - attack.T1014
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1574/'
+  - 'https://attack.mitre.org/techniques/T1574/013/'
+  - 'https://attack.mitre.org/tactics/TA0005/'
+  - 'https://attack.mitre.org/techniques/T1014/'
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and Selection_2 and Selection_3 and Selection_4
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.action|contains:
+      - session_id_change
+      - change
+      - create
+      - executed
+  Selection_3:
+    process.name|startswith:
+      - kworker
+  Selection_4:
+    user.id|all:
+      - '0'

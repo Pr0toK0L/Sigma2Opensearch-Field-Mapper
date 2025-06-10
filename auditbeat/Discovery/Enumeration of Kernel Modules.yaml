@@ -1,0 +1,47 @@
+id: ""
+logsource:
+  product: linux
+title: Enumeration of Kernel Modules
+description: >-
+  Loadable Kernel Modules (or LKMs) are pieces of code that can be loaded and
+  unloaded into the kernel upon demand.
+tags:
+  - attack.Discovery
+  - attack.TA0007
+  - attack.T1082
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0007/'
+  - 'https://attack.mitre.org/techniques/T1082/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and (Selection_5
+    or Selection_6 or Selection_7)
+  Selection_1:
+    event.category|all:
+      - process
+  Selection_2:
+    host.os.type|all:
+      - linux
+  Selection_3:
+    event.type|all:
+      - start
+  Selection_5:
+    process.name|contains:
+      - lsmod
+      - modinfo
+  Selection_6:
+    process.name|all:
+      - kmod
+    process.args|all:
+      - list
+  Selection_7:
+    process.name|all:
+      - depmod
+    process.args|contains:
+      - '--all'
+      - '-a'

@@ -1,0 +1,49 @@
+id: "'
+logsource:
+  product: linux
+title: Potential Cookies Theft via Browser Debugging
+description: >-
+  Identifies the execution of a Chromium based browser with the debugging
+  process argument, which may indicate an attempt to steal authentication
+  cookies.
+tags:
+  - attack.Credential_Access
+  - attack.TA0006
+  - attack.T1539
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0006/'
+  - 'https://attack.mitre.org/techniques/T1539/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5
+  Selection_1:
+    event.type|contains:
+      - start
+      - process_started
+      - info
+  Selection_2:
+    process.name|contains:
+      - Microsoft Edge
+      - chrome
+      - Google Chrome
+      - google-chrome-stable
+      - google-chrome-beta
+      - google-chrome
+      - msedge
+  Selection_3:
+    process.args|contains:
+      - '--remote-debugging-port=*'
+      - '--remote-debugging-targets=*'
+      - '--remote-debugging-pipe=*'
+  Selection_4:
+    process.args|all:
+      - '--user-data-dir=*'
+  Selection_5:
+    process.args|all:
+      - '--remote-debugging-port=0'

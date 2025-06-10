@@ -1,0 +1,141 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Potential Persistence via File Modification
+description: >-
+  This rule leverages the File Integrity Monitoring (FIM) integration to detect
+  file modifications of files that are commonly used for persistence on Linux
+  systems. The rule detects modifications to files that are commonly used for
+  cron jobs, systemd services, message-of-the-day (MOTD), SSH configurations,
+  shell configurations, runtime control, init daemon, passwd/sudoers/shadow
+  files, Systemd udevd, and XDG/KDE autostart entries. To leverage this rule,
+  the paths specified in the query need to be added to the FIM policy in the
+  Elastic Security app.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1037
+  - attack.t1037.004
+  - attack.t1543
+  - attack.t1543.002
+  - attack.t1556
+  - attack.t1574
+  - attack.t1574.006
+  - attack.t1136
+  - attack.t1136.001
+  - attack.privilege_escalation
+  - attack.TA0004
+  - attack.t1053
+  - attack.t1053.003
+  - attack.t1548
+  - attack.t1548.003
+  - attack.auditbeat
+falsepositives: []
+level: low
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: Selection_1 and not Selection_2
+  Selection_1:
+    host.os.type|all:
+      - linux
+    event.dataset|all:
+      - fim.event
+    event.action|all:
+      - updated
+      - update
+    file.path|contains:
+      - /etc/cron.d/*
+      - /etc/cron.daily/*
+      - /etc/cron.hourly/*
+      - /etc/cron.monthly/*
+      - /etc/cron.weekly/*
+      - /etc/crontab
+      - /var/spool/cron/crontabs/*
+      - /etc/cron.allow
+      - /etc/cron.deny
+      - /var/spool/anacron/*
+      - /var/spool/cron/atjobs/*
+      - /etc/systemd/system/*
+      - /usr/local/lib/systemd/system/*
+      - /lib/systemd/system/*
+      - /usr/lib/systemd/system/*
+      - /home/*/.config/systemd/user/*
+      - /home/*/.local/share/systemd/user/*
+      - /root/.config/systemd/user/*
+      - /root/.local/share/systemd/user/*
+      - /etc/ld.so.preload
+      - /etc/ld.so.conf.d/*
+      - /etc/ld.so.conf
+      - /etc/update-motd.d/*
+      - /home/*/.ssh/*
+      - /root/.ssh/*
+      - /etc/ssh/*
+      - /etc/profile
+      - /etc/profile.d/*
+      - /etc/bash.bashrc
+      - /etc/zsh/*
+      - /etc/csh.cshrc
+      - /etc/csh.login
+      - /etc/fish/config.fish
+      - /etc/ksh.kshrc
+      - /home/*/.profile
+      - /home/*/.bashrc
+      - /home/*/.bash_login
+      - /home/*/.bash_logout
+      - /root/.profile
+      - /root/.bashrc
+      - /root/.bash_login
+      - /root/.bash_logout
+      - /home/*/.zprofile
+      - /home/*/.zshrc
+      - /root/.zprofile
+      - /root/.zshrc
+      - /home/*/.cshrc
+      - /home/*/.login
+      - /home/*/.logout
+      - /root/.cshrc
+      - /root/.login
+      - /root/.logout
+      - /home/*/.config/fish/config.fish
+      - /root/.config/fish/config.fish
+      - /home/*/.kshrc
+      - /root/.kshrc
+      - /etc/rc.common
+      - /etc/rc.local
+      - /etc/init.d/*
+      - /etc/passwd
+      - /etc/shadow
+      - /etc/sudoers
+      - /etc/sudoers.d/*
+      - /lib/udev/*
+      - /etc/udev/rules.d/*
+      - /usr/lib/udev/rules.d/*
+      - /run/udev/rules.d/*
+      - /home/*/.config/autostart/*
+      - /root/.config/autostart/*
+      - /etc/xdg/autostart/*
+      - /usr/share/autostart/*
+      - /home/*/.kde/Autostart/*
+      - /root/.kde/Autostart/*
+      - /home/*/.kde4/Autostart/*
+      - /root/.kde4/Autostart/*
+      - /home/*/.kde/share/autostart/*
+      - /root/.kde/share/autostart/*
+      - /home/*/.kde4/share/autostart/*
+      - /root/.kde4/share/autostart/*
+      - /home/*/.local/share/autostart/*
+      - /root/.local/share/autostart/*
+      - /home/*/.config/autostart-scripts/*
+      - /root/.config/autostart-scripts/*
+  Selection_2:
+    file.path|contains:
+      - /var/spool/cron/crontabs/tmp.*
+      - /run/udev/rules.d/*rules.*
+      - /home/*/.ssh/known_hosts.*
+      - /root/.ssh/known_hosts.*
+    file.extension|contains:
+      - dpkg-new
+      - dpkg-remove
+      - SEQ

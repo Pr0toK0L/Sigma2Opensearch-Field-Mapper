@@ -1,0 +1,47 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Network Connections Initiated XDG Autostart Entry
+description: >-
+  Detects network connections initiated through Cross-Desktop Group (XDG)
+  autostart entries for GNOME and XFCE-based Linux distributions. XDG Autostart
+  entries can be used to execute arbitrary commands or scripts when a user logs
+  in. This rule helps to identify potential malicious activity where an attacker
+  may have modified XDG autostart scripts to establish persistence on the
+  system.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1547
+  - attack.t1547.013
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/techniques/T1547/'
+author: hoang.nguyen
+detection:
+  condition: (selection1 or selection2) or network_selection
+  selection1:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - executed
+    process.executable:
+      - /usr/bin/xfce4-session
+  selection2:
+    process.executable:
+      - /bin/sh
+    process.args|contains:
+      - export GIO_LAUNCHED_DESKTOP_FILE_PID=$$;*
+  network_selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action:
+      - connection_attempted
+      - connected-to

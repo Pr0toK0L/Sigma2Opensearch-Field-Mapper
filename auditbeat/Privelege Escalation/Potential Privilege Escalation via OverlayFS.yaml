@@ -1,0 +1,63 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Privilege Escalation via OverlayFS
+description: >-
+  Identifies an attempt to exploit a local privilege escalation (CVE-2023-2640
+  and CVE-2023-32629) via a flaw in Ubuntu modifications to OverlayFS. These
+  flaws allow the creation of specialized executables, which, upon execution,
+  grant the ability to escalate privileges to root on the affected machine.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+falsepositives: []
+level: high
+status: stable
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: Elastic
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and Selection_6 and not Selection_7) or (Selection_8 and Selection_9 and
+    Selection_10 and not Selection_11)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - unshare
+  Selection_5:
+    process.args|contains:
+      - '-r'
+      - '-rm'
+      - m
+  Selection_6:
+    process.args|contains:
+      - cap_setuid
+  Selection_7:
+    user.id|all:
+      - '0'
+  Selection_8:
+    host.os.type|all:
+      - linux
+  Selection_9:
+    event.type|all:
+      - change
+  Selection_10:
+    event.action|all:
+      - uid_change
+      - change
+      - create
+  Selection_11:
+    user.id|all:
+      - '0'

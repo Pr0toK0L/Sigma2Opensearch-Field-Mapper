@@ -1,0 +1,34 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Kernel Module Load via insmod
+description: >-
+  Detects the use of the insmod binary to load a Linux kernel object file.
+  Threat actors can use this binary, given they have root privileges, to load a
+  rootkit on a system providing them with complete control and the ability to
+  hide from security products. Manually loading a kernel module in this manner
+  should not be at all common and can indicate suspicious or malicious behavior.
+tags:
+  - attack.persistence
+  - attack.TA0003
+  - attack.t1547
+  - attack.t1547.006
+falsepositives:
+  - >-
+    Legitimate use of insmod to load kernel modules by system administrators or
+    automated tools
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type|all:
+      - linux
+    event.type|all:
+      - start
+    process.name|all:
+      - insmod
+    process.args|contains:
+      - '*.ko'

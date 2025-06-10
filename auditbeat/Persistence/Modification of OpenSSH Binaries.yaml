@@ -1,0 +1,58 @@
+id: 25b9c01c-350d-4b95-bed1-836d04a4f324
+logsource:
+  product: linux
+title: Modification of OpenSSH Binaries
+description: >-
+  Adversaries may modify SSH related binaries for persistence or credential
+  access by patching sensitive functions to enable unauthorized access or by
+  logging SSH credentials for exfiltration.
+tags:
+  - attack.credential_access
+  - attack.persistence
+  - attack.lateral_movement
+  - attack.TA0003
+  - attack.TA0006
+  - attack.TA0008
+  - attack.t1543
+  - attack.t1556
+  - attack.t1021
+  - attack.t1563
+  - attack.t1563.001
+  - attack.t1021.004
+falsepositives:
+  - >-
+    Trusted OpenSSH executable updates. It's recommended to verify the integrity
+    of OpenSSH binary changes.
+level: medium
+status: experimental
+references: []
+author: hoang.nguyen
+detection:
+  condition: selection and not filter1
+  selection:
+    event.category|all:
+      - file
+    host.os.type|all:
+      - linux
+    event.type|contains:
+      - change
+      - create
+    file.path|contains:
+      - /usr/bin/scp
+      - /usr/bin/sftp
+      - /usr/bin/ssh
+      - /usr/sbin/sshd
+    file.name|contains:
+      - libkeyutils.so
+  filter1:
+    process.name|contains:
+      - dnf
+      - dnf-automatic
+      - dpkg
+      - yum
+      - rpm
+      - yum-cron
+      - anacron
+      - platform-python
+    process.executable|contains:
+      - /usr/share/elasticsearch/*

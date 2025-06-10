@@ -1,0 +1,71 @@
+id: ""
+logsource:
+  product: linux
+title: Potential Sudo Token Manipulation Process Inject
+description: >-
+  This rule detects potential sudo token manipulation attacks through process
+  injection by monitoring the use of a debugger (gdb) process followed by a
+  successful uid change event during the execution of the sudo process. A sudo
+  token manipulation attack is performed by injecting into a process that has a
+  valid sudo token, which can then be used by attackers to activate their own
+  sudo token.
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1055
+  - attack.T1055.008
+  - attack.T1548
+  - attack.T1548.003
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1055/'
+  - 'https://attack.mitre.org/techniques/T1055/008/'
+  - 'https://attack.mitre.org/techniques/T1548/'
+  - 'https://attack.mitre.org/techniques/T1548/003/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and not
+    Selection_5 and not Selection_6) or (Selection_7 and Selection_8 and
+    Selection_9 and Selection_10 and Selection_11 and Selection_12)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|contains:
+      - exec
+      - executed
+  Selection_4:
+    process.name|contains:
+      - gdb
+  Selection_5:
+    process.user.id|all:
+      - '0'
+  Selection_6:
+    process.group.id|all:
+      - '0'
+  Selection_7:
+    host.os.type|all:
+      - linux
+  Selection_8:
+    event.action|contains:
+      - uid_change
+      - change
+  Selection_9:
+    event.type|all:
+      - change
+  Selection_10:
+    process.name|all:
+      - sudo
+  Selection_11:
+    process.user.id|all:
+      - '0'
+  Selection_12:
+    process.group.id|all:
+      - '0'

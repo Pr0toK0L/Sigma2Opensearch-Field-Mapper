@@ -1,0 +1,41 @@
+id: f3e4d5c6-7b8a-4c9d-8e1f-f3e4d5c67b8a
+logsource:
+  product: linux
+title: Attempt to Disable IPTables or Firewall
+description: >-
+  Adversaries may attempt to disable the iptables or firewall service in an
+  attempt to affect how a host is allowed to receive or send network traffic.
+tags:
+  - attack.defense_evasion
+  - attack.t1562
+  - attack.TA0005
+falsepositives:
+  - >-
+    Legitimate administrative actions to disable or stop firewall services for
+    maintenance or troubleshooting
+level: low
+status: experimental
+references:
+  - 'https://example.com/reference-to-rule'
+author: hoang.nguyen
+detection:
+  condition: selection
+  selection:
+    host.os.type:
+      - linux
+    event.type:
+      - start
+    event.action|contains:
+      - exec
+      - exec_event
+      - executed
+    process.name|contains:
+      - ufw
+      - iptables
+      - service
+      - chkconfig
+      - systemctl
+    process.args|contains:
+      - firewalld
+      - ip6tables
+      - iptables

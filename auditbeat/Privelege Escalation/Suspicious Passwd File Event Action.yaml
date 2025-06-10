@@ -1,0 +1,61 @@
+id: ""
+logsource:
+  product: linux
+title: Suspicious Passwd File Event Action
+description: >-
+  Monitors for the generation of a passwd password entry via openssl, followed
+  by a file write activity on the /etc/passwd file. 
+tags:
+  - attack.Privilege_Escalation
+  - attack.TA0004
+  - attack.T1068
+  - attack.auditbeat
+falsepositives: []
+level: medium
+status: experimental
+references:
+  - 'https://attack.mitre.org/tactics/TA0004/'
+  - 'https://attack.mitre.org/techniques/T1068/'
+author: hoang.nguyen
+detection:
+  condition: >-
+    (Selection_1 and Selection_2 and Selection_3 and Selection_4 and Selection_5
+    and not Selection_6) or (Selection_7 and Selection_8 and not Selection_9 and
+    not Selection_10 and Selection_11 and not Selection_12)
+  Selection_1:
+    host.os.type|all:
+      - linux
+  Selection_2:
+    event.type|all:
+      - start
+  Selection_3:
+    event.action|all:
+      - exec
+      - executed
+  Selection_4:
+    process.name|all:
+      - openssl
+  Selection_5:
+    process.args|contains:
+      - passwd
+  Selection_6:
+    user.id|all:
+      - '0'
+  Selection_7:
+    host.os.type|all:
+      - linux
+  Selection_8:
+    file.path|all:
+      - /etc/passwd
+  Selection_9:
+    process.parent.pid|all:
+      - '1'
+  Selection_10:
+    auditd.data.a2|all:
+      - '80000'
+  Selection_11:
+    event.outcome|all:
+      - success
+  Selection_12:
+    user.id|all:
+      - '0'
